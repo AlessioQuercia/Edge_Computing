@@ -7,7 +7,7 @@ import java.io.IOException;
 /**
  * Created by civi on 26/04/16.
  */
-public class StartServer {
+public class ServerCloud {
 
     private static final String HOST = "localhost";
     private static final int PORT = 1337;
