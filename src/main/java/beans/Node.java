@@ -11,6 +11,8 @@ import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import simulators.Measurement;
+import simulators.SensorServiceImpl;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.BufferedReader;
@@ -211,15 +213,22 @@ public class Node
 
                     System.out.println(nodeList.toString());
 
-                    //faccio partire il servizio sulla porta 8080
+                    // Il nodo si mette a disposizione come server in ascolto sulla porta dedicata ai sensori
                     try {
 
-//                        Server server = ServerBuilder.forPort(nodesPort).addService(new MethodsServiceImpl()).build();
-//
-//                        server.start();
-//
-//                        System.out.println("Server started!");
-//
+                        SensorServiceImpl sensorService = new SensorServiceImpl();
+
+                        Server server = ServerBuilder.forPort(sensorsPort).addService(sensorService).build();
+
+                        server.start();
+
+                        System.out.println("Server started!");
+
+                        while (true)
+                        {
+                            System.out.println(sensorService.getMeasurements());
+                        }
+
 //                        server.awaitTermination();
 
                     } catch (Exception e) {

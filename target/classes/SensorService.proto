@@ -1,0 +1,21 @@
+syntax = "proto3";
+package simulators;
+
+message MeasurementRequest
+{
+	string id = 1;
+	string type = 2;
+    double value = 3;
+    int64 timestamp = 4;
+}
+
+message MeasurementResponse
+{
+	string ack = 1;
+}
+
+// Defining a Service, a Service can have multiple RPC operations
+service SensorService 
+{
+    rpc streamToNode(stream MeasurementRequest) returns (MeasurementResponse);
+}

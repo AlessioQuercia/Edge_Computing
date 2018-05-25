@@ -9,9 +9,10 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 
+import javax.ws.rs.core.MediaType;
 import java.util.Random;
 
-public class Sensor extends Thread
+public class Sensor
 {
     private Client c;
     private int id;
@@ -22,7 +23,7 @@ public class Sensor extends Thread
 
     private Node communicationNode;
 
-    static long lastRequestTime = 0;
+    private long lastRequestTime = 0;
 
     private Simulator simulator;
 
@@ -53,7 +54,8 @@ public class Sensor extends Thread
         x = random.nextInt(100);
         y = random.nextInt(100);
 
-        this.start();
+        requestNearestNode();
+
     }
 
     public void requestNearestNode() {
@@ -70,7 +72,12 @@ public class Sensor extends Thread
             response = resource.get(ClientResponse.class);
             if (response.getStatus() == ClientResponse.Status.OK.getStatusCode()) {
                 //                System.out.println(response.getEntity(String.class));
-                communicationNode = response.getEntity(Node.class);
+                try {
+                    communicationNode = response.getEntity(Node.class);
+                }
+                catch (Exception e){
+                    System.out.println("Nessun nodo vicino trovato!");
+                }
 
                 setCommunicationNode(communicationNode);
 
@@ -93,5 +100,13 @@ public class Sensor extends Thread
     public Node getCommunicationNode()
     {
         return communicationNode;
+    }
+
+    public long getLastRequestTime() {
+        return lastRequestTime;
+    }
+
+    public void setLastRequestTime(long lastRequestTime) {
+        this.lastRequestTime = lastRequestTime;
     }
 }
