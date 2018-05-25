@@ -2,66 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0aea40d8-88ee-4dc9-a0c2-9d84a6aefab1" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_api_grpc_proto_google_common_protos_0_1_9.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_findbugs_jsr305_3_0_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_gson_gson_2_7.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_errorprone_error_prone_annotations_2_0_19.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_guava_guava_19_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_instrumentation_instrumentation_api_0_4_3.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_protobuf_protobuf_java_3_4_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_protobuf_protobuf_java_util_3_4_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_grpc_grpc_context_1_7_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_grpc_grpc_core_1_7_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_grpc_grpc_netty_1_7_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_grpc_grpc_protobuf_1_7_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_grpc_grpc_protobuf_lite_1_7_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_grpc_grpc_stub_1_7_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_buffer_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_codec_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_codec_http2_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_codec_http_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_codec_socks_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_common_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_handler_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_handler_proxy_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_resolver_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_netty_netty_transport_4_1_16_Final.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__io_opencensus_opencensus_api_0_6_0.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_3_8_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/beans/Node.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/beans/GlobalStat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/beans/LocalStat.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/simulators/Sensor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/simulators/SensorsSimulator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/simulators/Stream.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Progetto_SDP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Progetto_SDP.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/Analist.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/ServerCloud.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/Tester.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/beans/City.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/beans/Node.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/beans/Stat.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/services/AnalistsService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/services/NodesService$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/services/NodesService$2.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/services/NodesService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/services/SensorsService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/simulators/Measurement.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/simulators/PM10Simulator.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/simulators/SensorStream.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Progetto_SDP/simulators/Simulator.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Analist.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ServerCloud.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Tester.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/beans/City.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/beans/Node.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/beans/Stat.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/AnalistsService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/NodesService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/SensorsService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulators/Measurement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulators/PM10Simulator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulators/SensorStream.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/simulators/Simulator.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Analist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Analist.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/beans/Node.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/beans/Node.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/services/SensorsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/services/SensorsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Analist.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Analist.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/beans/Node.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/beans/Node.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/services/SensorsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/services/SensorsService.class" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -74,11 +26,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Node.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Node.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/beans/Node.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="261">
-              <caret line="216" column="73" selection-start-line="216" selection-start-column="73" selection-end-line="216" selection-end-column="73" />
+            <state relative-caret-position="380">
+              <caret line="211" column="60" lean-forward="true" selection-start-line="211" selection-start-column="60" selection-end-line="211" selection-end-column="60" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -86,59 +38,29 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pom.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="547">
-              <caret line="109" column="12" selection-start-line="109" selection-start-column="12" selection-end-line="109" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="State.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/beans/State.java">
+      <file leaf-file-name="PM10Simulator.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/simulators/PM10Simulator.java">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="8" selection-start-column="8" selection-end-column="8" />
+              <caret line="18" selection-start-line="18" selection-end-line="36" selection-end-column="5" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Analist.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/Analist.java">
+      <file leaf-file-name="Simulator.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Simulator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2176">
-              <caret line="141" selection-start-line="141" selection-end-line="147" selection-end-column="49" />
+            <state relative-caret-position="153">
+              <caret line="10" column="19" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Tester.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/Tester.java">
+      <file leaf-file-name="Stream.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Stream.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1122">
-              <caret line="75" column="59" selection-start-line="75" selection-start-column="59" selection-end-line="75" selection-end-column="59" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NodesService.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/services/NodesService.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="952">
-              <caret line="64" selection-start-line="64" selection-end-line="64" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AnalistsService.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/services/AnalistsService.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="28" column="26" selection-start-line="28" selection-start-column="26" selection-end-line="28" selection-end-column="26" />
+            <state relative-caret-position="238">
+              <caret line="35" column="5" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -155,11 +77,40 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="City.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/beans/City.java">
+      <file leaf-file-name="SensorsSimulator.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/simulators/SensorsSimulator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2176">
-              <caret line="135" column="22" selection-start-line="135" selection-start-column="22" selection-end-line="135" selection-end-column="22" />
+            <state relative-caret-position="493">
+              <caret line="50" column="44" selection-start-line="50" selection-start-column="44" selection-end-line="50" selection-end-column="44" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#349#357#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Sensor.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Sensor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="663">
+              <caret line="39" column="37" selection-start-line="39" selection-start-column="37" selection-end-line="39" selection-end-column="37" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#2584#2585#0" expanded="true" />
+                <element signature="e#2641#2642#0" expanded="true" />
+                <element signature="e#2573#2574#0" expanded="true" />
+                <element signature="e#2612#2613#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="NodesService.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/services/NodesService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="74">
+              <caret line="29" column="57" lean-forward="true" selection-start-line="29" selection-start-column="57" selection-end-line="29" selection-end-column="65" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -167,11 +118,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Stat.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/beans/Stat.java">
+      <file leaf-file-name="SensorsService.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/services/SensorsService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="16" selection-start-line="16" selection-end-line="16" />
+            <state relative-caret-position="170">
+              <caret line="18" column="71" selection-start-line="18" selection-start-column="71" selection-end-line="18" selection-end-column="71" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -181,8 +135,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Enum" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -190,6 +144,7 @@
     <findStrings>
       <find>get</find>
       <find>getB</find>
+      <find>read</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -215,7 +170,15 @@
         <option value="$PROJECT_DIR$/src/services/NodesService.java" />
         <option value="$PROJECT_DIR$/src/beans/Node.java" />
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/Analist.java" />
+        <option value="$PROJECT_DIR$/src/main/java/beans/LocalStat.java" />
+        <option value="$PROJECT_DIR$/src/main/java/beans/GlobalStat.java" />
         <option value="$PROJECT_DIR$/src/main/java/beans/Node.java" />
+        <option value="$PROJECT_DIR$/src/main/java/simulators/SensorsSimulator.java" />
+        <option value="$PROJECT_DIR$/src/main/java/services/SensorsService.java" />
+        <option value="$PROJECT_DIR$/src/main/java/simulators/SensorRequest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/simulators/Stream.java" />
+        <option value="$PROJECT_DIR$/src/main/java/simulators/Sensor.java" />
       </list>
     </option>
   </component>
@@ -240,9 +203,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="AndroidView" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -276,10 +237,28 @@
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="beans" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="Progetto_SDP" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Progetto_SDP" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="services" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Progetto_SDP" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Progetto_SDP" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="simulators" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -313,7 +292,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.Node">
+  <component name="RunManager" selected="Application.ServerCloud">
     <configuration name="Analist" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Analist" />
       <module name="Progetto_SDP" />
@@ -326,6 +305,17 @@
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="beans.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+    </configuration>
+    <configuration name="SensorsSimulator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="simulators.SensorsSimulator" />
+      <module name="Progetto_SDP" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="simulators.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -402,11 +392,13 @@
       <item itemvalue="Application.Tester" />
       <item itemvalue="Application.Analist" />
       <item itemvalue="Application.Node" />
+      <item itemvalue="Application.SensorsSimulator" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Node" />
+        <item itemvalue="Application.SensorsSimulator" />
         <item itemvalue="Application.ServerCloud" />
+        <item itemvalue="Application.Node" />
         <item itemvalue="Application.Analist" />
         <item itemvalue="Application.Tester" />
       </list>
@@ -438,16 +430,18 @@
       <workItem from="1526743470542" duration="5036000" />
       <workItem from="1526750025237" duration="5186000" />
       <workItem from="1526756397678" duration="872000" />
-      <workItem from="1526758538288" duration="1952000" />
+      <workItem from="1526758538288" duration="2175000" />
+      <workItem from="1526799747837" duration="1422000" />
+      <workItem from="1527091707128" duration="3362000" />
+      <workItem from="1527231980222" duration="9677000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="86141000" />
+    <option name="totallyTimeSpent" value="100825000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -461,11 +455,11 @@
       <window_info anchor="right" id="Maven Projects" order="3" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3290938" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3290938" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24963397" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22767204" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -488,56 +482,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/Tester.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" lean-forward="true" selection-start-line="25" selection-end-line="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/beans/Word.java" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/services/AnalistsService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="28" selection-start-line="2" selection-start-column="28" selection-end-line="2" selection-end-column="28" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/services/SensorsService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/services/WordsService.java" />
-    <entry file="file://$PROJECT_DIR$/src/beans/Dictionary.java" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/beans/City.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1241">
-          <caret line="85" column="128" selection-start-line="85" selection-start-column="128" selection-end-line="85" selection-end-column="128" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/services/NodesService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="20" column="72" selection-start-line="20" selection-start-column="72" selection-end-line="20" selection-end-column="72" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/beans/City.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="952">
@@ -658,62 +602,10 @@
     <entry file="file://$PROJECT_DIR$/src/beans/Dictionary.java" />
     <entry file="file://$PROJECT_DIR$/src/services/WordsService.java" />
     <entry file="file://$PROJECT_DIR$/grid-jaxb.xml" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Simulator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="5" column="28" selection-start-line="5" selection-start-column="28" selection-end-line="5" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/PM10Simulator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="19" selection-start-line="2" selection-start-column="19" selection-end-line="2" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/SensorStream.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/services/SensorsService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="19" column="38" selection-start-line="19" selection-start-column="38" selection-end-line="19" selection-end-column="38" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Measurement.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="578">
-          <caret line="50" selection-start-line="50" selection-end-line="52" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/beans/Stat.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_121/src.zip!/java/lang/Thread.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="132">
           <caret line="744" selection-start-line="744" selection-end-line="744" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/Analist.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2176">
-          <caret line="141" selection-start-line="141" selection-end-line="147" selection-end-column="49" />
         </state>
       </provider>
     </entry>
@@ -744,26 +636,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/ServerCloud.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="12" column="41" selection-start-line="12" selection-start-column="41" selection-end-line="12" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/services/NodesService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="952">
-          <caret line="64" selection-start-line="64" selection-end-line="64" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="547">
+        <state relative-caret-position="1853">
           <caret line="109" column="12" selection-start-line="109" selection-start-column="12" selection-end-line="109" selection-end-column="12" />
         </state>
       </provider>
@@ -775,12 +650,166 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/beans/Stat.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/SensorStream.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/Analist.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3179">
+          <caret line="200" column="8" selection-start-line="200" selection-start-column="8" selection-end-line="200" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Measurement.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="578">
+          <caret line="50" selection-start-line="50" selection-end-line="52" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/beans/LocalStar.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/beans/LocalStat.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
+          <folding>
+            <element signature="e#104#105#0" expanded="true" />
+            <element signature="e#142#143#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/beans/GlobalStat.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="1" selection-start-line="3" selection-start-column="1" selection-end-line="3" selection-end-column="1" />
+          <folding>
+            <element signature="e#107#108#0" expanded="true" />
+            <element signature="e#145#146#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/beans/Node.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="261">
-          <caret line="216" column="73" selection-start-line="216" selection-start-column="73" selection-end-line="216" selection-end-column="73" />
+        <state relative-caret-position="380">
+          <caret line="211" column="60" lean-forward="true" selection-start-line="211" selection-start-column="60" selection-end-line="211" selection-end-column="60" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/ServerCloud.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="12" column="41" selection-start-line="12" selection-start-column="41" selection-end-line="12" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/services/SensorsService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="18" column="71" selection-start-line="18" selection-start-column="71" selection-end-line="18" selection-end-column="71" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_121/src.zip!/java/lang/Throwable.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="632" column="16" selection-start-line="632" selection-start-column="16" selection-end-line="632" selection-end-column="16" />
+          <folding>
+            <element signature="e#26222#26223#0" expanded="true" />
+            <element signature="e#26265#26266#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/PM10Simulator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret line="18" selection-start-line="18" selection-end-line="36" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/SensorRequest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="48" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/services/NodesService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="74">
+          <caret line="29" column="57" lean-forward="true" selection-start-line="29" selection-start-column="57" selection-end-line="29" selection-end-column="65" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/SensorsSimulator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="50" column="44" selection-start-line="50" selection-start-column="44" selection-end-line="50" selection-end-column="44" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#349#357#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Simulator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="10" column="19" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Stream.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="35" column="5" selection-start-line="35" selection-start-column="5" selection-end-line="35" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/simulators/Sensor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="663">
+          <caret line="39" column="37" selection-start-line="39" selection-start-column="37" selection-end-line="39" selection-end-column="37" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2584#2585#0" expanded="true" />
+            <element signature="e#2641#2642#0" expanded="true" />
+            <element signature="e#2573#2574#0" expanded="true" />
+            <element signature="e#2612#2613#0" expanded="true" />
           </folding>
         </state>
       </provider>

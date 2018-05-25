@@ -195,7 +195,7 @@ public class Analist
                 else
                     throw new Exception();
             } catch (Exception e) {
-                System.out.println("Not valid ID. The ID must be a positive integer.");
+                System.out.println("Not valid number of stats. The number of stats must be a positive integer.");
             }
         }
         

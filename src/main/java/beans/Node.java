@@ -197,11 +197,11 @@ public class Node
             try {
                 WebResource resource;
 
-                String analistsServices = serverAddress + "/nodesServices";
+                String nodesServices = serverAddress + "/nodesServices";
                 String method = "/add";
                 String params = "/" + id + "/" + ipAddress + "/" + sensorsPort + "/" + nodesPort + "/" + x + "/" + y ;
 
-                resource = c.resource(analistsServices + method + params);
+                resource = c.resource(nodesServices + method + params);
                 ClientResponse response = null;
                 response = resource.post(ClientResponse.class);
                 if (response.getStatus() == ClientResponse.Status.OK.getStatusCode())
