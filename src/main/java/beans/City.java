@@ -21,6 +21,10 @@ public class City
     @XmlElement(name = "localStats")
     Set<Stat> localStats;
 
+    private Object globalStatsLock = new Object();
+
+    private Object localStatsLock = new Object();
+
     private static City instance;
 
     public City()
@@ -138,18 +142,22 @@ public class City
         return null;
     }
 
-    public synchronized void addGlobalStats(Set<Stat> stats)
+    public void addGlobalStat(Stat stat)
     {
-        Stat[] statsArray = (Stat[])stats.toArray();
-        for (int i=0; i<statsArray.length; i++)
-            globalStats.add(statsArray[i]);
+        synchronized (globalStatsLock)
+        {
+            globalStats.add(stat);
+        }
     }
 
-    public synchronized void addLocalStats(Set<Stat> stats)
+    public void addLocalStats(Set<Stat> stats)
     {
-        Stat[] statsArray = (Stat[])stats.toArray();
-        for (int i=0; i<statsArray.length; i++)
-            localStats.add(statsArray[i]);
+        synchronized (localStats)
+        {
+            Stat[] statsArray = (Stat[]) stats.toArray(new Stat[stats.size()]);
+            for (int i = 0; i < statsArray.length; i++)
+                localStats.add(statsArray[i]);
+        }
     }
 
     public Node getNearestNode(int x, int y)

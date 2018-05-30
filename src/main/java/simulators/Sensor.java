@@ -76,6 +76,7 @@ public class Sensor
                     communicationNode = response.getEntity(Node.class);
                 }
                 catch (Exception e){
+                    communicationNode = null;
                     System.out.println("Nessun nodo vicino trovato!");
                 }
 

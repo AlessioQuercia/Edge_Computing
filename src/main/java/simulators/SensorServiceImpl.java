@@ -1,18 +1,22 @@
 package simulators;
 
+import beans.Buffer;
+import beans.Node;
 import io.grpc.stub.StreamObserver;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
 
 public class SensorServiceImpl extends SensorServiceGrpc.SensorServiceImplBase {
 
-    private Set<Measurement> measurements;
+    private Buffer measurementsBuffer;
+
+    public Object bufferLock = new Object();
+
+    public int insertCounter = 0;
 
     public SensorServiceImpl()
     {
-        this.measurements = new TreeSet<Measurement>();
+        this.measurementsBuffer = new Buffer();
     }
 
     @Override
@@ -25,14 +29,31 @@ public class SensorServiceImpl extends SensorServiceGrpc.SensorServiceImplBase {
             {
                 Measurement m = new Measurement(measurementRequest.getId(), measurementRequest.getType(),
                         measurementRequest.getValue(), measurementRequest.getTimestamp());
-                addMeasurement(m);
-                System.out.println("Measurement received!");
+                measurementsBuffer.put(m);
+                synchronized (bufferLock)
+                {
+                    if (insertCounter == 40)
+                        bufferLock.notifyAll();
+                    else
+                        insertCounter++;
+                }
+//                System.out.println("Measurement received!");
             }
 
             @Override
             public void onError(Throwable throwable)
             {
-                System.out.println("Errore! " + throwable.getMessage());
+                if (throwable.getMessage() == "CANCELLED")
+                {
+                    synchronized (bufferLock)
+                    {
+                        insertCounter = 40;
+                        bufferLock.notifyAll();
+                        System.out.println("Comunicazione con nodo interrotta!");
+                    }
+                }
+                else
+                    System.out.println(throwable.getMessage());
             }
 
             @Override
@@ -45,16 +66,18 @@ public class SensorServiceImpl extends SensorServiceGrpc.SensorServiceImplBase {
         };
     }
 
-    public synchronized void addMeasurement(Measurement measurement)
+    public ArrayList<Measurement> getMeasurementsBuffer()
     {
-        measurements.add(measurement);
+        return new ArrayList<Measurement>(measurementsBuffer.buffer);
     }
 
-    public synchronized Set<Measurement> getMeasurements()
+    public Buffer getBuffer()
     {
-        return measurements;
+        return measurementsBuffer;
     }
 
-
-
+    public void resetInsertCounter()
+    {
+        insertCounter = 20;
+    }
 }

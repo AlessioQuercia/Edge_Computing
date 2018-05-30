@@ -16,9 +16,7 @@ import simulators.SensorServiceImpl;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.*;
 import java.util.*;
 
@@ -138,8 +136,12 @@ public class Node
         String serverAddress = null;
         ArrayList<Integer> stats;
 
-        ArrayList<Node> nodeList;
+        ArrayList<Node> nodeList = null;
+        Node thisNode = null;
         State state = State.NOT_COORDINATOR;
+
+        Object timerLock = new Object();
+        long lastTime = System.currentTimeMillis();
 
         ClientConfig config = new DefaultClientConfig();
         config.getClasses().add(JacksonJaxbJsonProvider.class);
@@ -190,75 +192,43 @@ public class Node
         /* Tentativi di generazione posizione per il nodo corrente */
 
         int tries = 0;
+        WebResource resource;
+        ClientResponse response = null;
         while (!validPosition)
         {
             if (tries >= 10) break;
             x = random.nextInt(100);
             y = random.nextInt(100);
 
-            try {
-                WebResource resource;
-
+            try
+            {
                 String nodesServices = serverAddress + "/nodesServices";
                 String method = "/add";
-                String params = "/" + id + "/" + ipAddress + "/" + sensorsPort + "/" + nodesPort + "/" + x + "/" + y ;
+                String params = "/" + id + "/" + ipAddress + "/" + sensorsPort + "/" + nodesPort + "/" + x + "/" + y;
 
                 resource = c.resource(nodesServices + method + params);
-                ClientResponse response = null;
                 response = resource.post(ClientResponse.class);
                 if (response.getStatus() == ClientResponse.Status.OK.getStatusCode())
                 {
-                    nodeList = (ArrayList)response.getEntity(new GenericType<List<Node>>() {});
+                    nodeList = (ArrayList) response.getEntity(new GenericType<List<Node>>() {
+                    });
 //                    System.out.println(response.getEntity(String.class));
+
+                    for (int i = 0; i<nodeList.size(); i++)
+                    {
+                        if (nodeList.get(i).getId() == id)
+                            thisNode = nodeList.get(i);
+                    }
 
                     System.out.println(nodeList.toString());
 
-                    // Il nodo si mette a disposizione come server in ascolto sulla porta dedicata ai sensori
-                    try {
-
-                        SensorServiceImpl sensorService = new SensorServiceImpl();
-
-                        Server server = ServerBuilder.forPort(sensorsPort).addService(sensorService).build();
-
-                        server.start();
-
-                        System.out.println("Server started!");
-
-                        while (true)
-                        {
-                            System.out.println(sensorService.getMeasurements());
-                        }
-
-//                        server.awaitTermination();
-
-                    } catch (Exception e) {
-
-                        e.printStackTrace();
-
-                    }
-
-                    if (nodeList.size() == 1)
-                    {
-                        //Il nodo è l'unico nella rete, perciò diventa il coordinatore.
-                        state = State.COORDINATOR;
-
-                    }
-                    else
-                    {
-                        //Il nodo non è l'unico nella rete, perciò deve presentarsi e chiedere chi è il coordinatore.
-
-                    }
-
-                    if (state.equals(State.COORDINATOR))
-                        System.out.println("I am the Coordinator!");
-
                     validPosition = true;
+                    break;
                 }
-                else
-                    System.out.println(response);
 
-
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
             }
 
@@ -266,6 +236,82 @@ public class Node
         }
 
         conn.disconnect();
+        c.destroy();
+
+        if (validPosition)
+        {
+            if (nodeList.size() == 1)
+            {
+                //Il nodo è l'unico nella rete, perciò diventa il coordinatore.
+                state = State.COORDINATOR;
+
+            }
+            else
+            {
+                //Il nodo non è l'unico nella rete, perciò deve presentarsi e chiedere chi è il coordinatore.
+
+            }
+
+            NodeServer nodeServer = new NodeServer(thisNode, state);
+            NodeClient nodeClient = null;
+            nodeServer.start();
+
+            switch (state)
+            {
+                case NOT_COORDINATOR:
+                {
+                    break;
+                }
+                case COORDINATOR:
+                {
+                    System.out.println("I am the Coordinator!");
+
+                    nodeClient = new NodeClient(thisNode, serverAddress);
+                    nodeClient.start();
+
+                    break;
+                }
+                case WAITING_COORDINATOR: break;
+                case ELECTING_COORDINATOR: break;
+            }
+
+            if (wantToExit())
+            {
+                String nodesServices = serverAddress + "/nodesServices";
+                String method = "/remove";
+                String params = "/" + id;
+                resource = c.resource(nodesServices + method + params);
+                response = resource.delete(ClientResponse.class);
+                if (response.getStatus() == ClientResponse.Status.OK.getStatusCode())
+                {
+                    // Vengono chiuse tutte le connessioni e il nodo esce
+                    // CHIUDERE LA CONNESSIONE CON GLI ALTRI NODI
+                    nodeServer.setStop();
+                    nodeServer.getServer().shutdownNow();
+                    if (state == State.COORDINATOR)
+                    {
+                        nodeClient.setStop();
+                        nodeClient.getConn().disconnect();
+                        nodeClient.getClient().destroy();
+                    }
+//                    conn.disconnect();
+//                    c.destroy();
+                }
+                else
+                {
+                    System.out.println(response);
+                }
+
+            }
+        }
+        else
+        {
+            System.out.println(response);
+        }
+
+
+        System.out.println("EXIT");
+        return;
     }
 
     public static int readArgInt(String type)
@@ -331,5 +377,36 @@ public class Node
     public String toString()
     {
         return id+"";
+    }
+
+    public static void printPanel()
+    {
+        System.out.println("STATISTICHE LOCALI");
+        System.out.println("STATISTICHE GLOBALI");
+    }
+
+    public static boolean wantToExit()
+    {
+
+        BufferedReader inFromUser =
+                new BufferedReader(new InputStreamReader(System.in));
+
+        String s;
+        boolean validString = false;
+
+        while (!validString)
+        {
+            System.out.print("Type \'q\' to remove the node from the Server Cloud: ");
+            try {
+                s = inFromUser.readLine().trim();
+                if (s.equals("q"))
+                    validString = true;
+                else
+                    throw new Exception();
+            } catch (Exception e) {
+                System.out.println("Not a valid input.");
+            }
+        }
+        return true;
     }
 }

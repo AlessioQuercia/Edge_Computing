@@ -82,12 +82,13 @@ public class NodesService
     }
 
     //It allows the Nodes Coordinator to send global stats to the server
-    @Path("sendGlobalStats")
+    @Path("sendGlobalStat")
     @POST
     @Consumes({"application/json", "application/xml"})
-    public Response sendGlobalStats(Set<Stat> stats)
+    public Response sendGlobalStat(Stat stat)
     {
-        City.getInstance().addGlobalStats(stats);
+        System.out.println(stat);
+        City.getInstance().addGlobalStat(stat);
         return Response.ok().build();
     }
 

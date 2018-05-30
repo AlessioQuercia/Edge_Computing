@@ -17,6 +17,8 @@ public class Stream implements SensorStream
 
     private StreamObserver<SensorServiceOuterClass.MeasurementRequest> requestObserver;
 
+    private int currentCommunicationNodeId;
+
     private boolean communicationOpen;
 
     public Stream(Sensor sensor)
@@ -24,6 +26,7 @@ public class Stream implements SensorStream
         this.sensor = sensor;
         this.measurements = new HashSet<Measurement>();
         this.communicationOpen = false;
+        this.currentCommunicationNodeId = -1;
         System.out.println("Hi, I am a new stream!");
 
 //        startAsynchronousStream();
@@ -45,6 +48,11 @@ public class Stream implements SensorStream
             sensor.requestNearestNode();
             sensor.setLastRequestTime(System.currentTimeMillis());
             System.out.print("Sto scartando i dati: ");
+        }
+        else if (sensor.getCommunicationNode() != null && sensor.getCommunicationNode().getId() != currentCommunicationNodeId)
+        {
+            communicationOpen = false;
+            currentCommunicationNodeId = sensor.getCommunicationNode().getId();
         }
         else
         {
@@ -94,7 +102,7 @@ public class Stream implements SensorStream
             @Override
             //when the stream is completed (the server called "onCompleted") just close the channel
             public void onCompleted() {
-                System.out.println("StreamToStreamSum completed!");
+                System.out.println("StreamToNode completed!");
                 channel.shutdownNow();
             }
         });

@@ -1,9 +1,14 @@
 package beans;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "stat")
 public class Stat implements Comparable<Stat>
 {
     private double mean;
     private long timestamp;
+
+    public Stat() {};
 
     public Stat(double mean, long timestamp)
     {
@@ -33,5 +38,10 @@ public class Stat implements Comparable<Stat>
         Long thisTimestamp = timestamp;
         Long otherTimestamp = o.getTimestamp();
         return thisTimestamp.compareTo(otherTimestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "Stat [mean=" + mean + ", timestamp=" + timestamp + "]";
     }
 }
