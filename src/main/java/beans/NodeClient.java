@@ -4,23 +4,11 @@ import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import io.grpc.ServerBuilder;
-import simulators.Measurement;
-import simulators.SensorServiceImpl;
-
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
-
-import org.eclipse.persistence.jaxb.MarshallerProperties;
+import java.util.Set;
 
 public class NodeClient extends Thread
 {
@@ -70,7 +58,8 @@ public class NodeClient extends Thread
 
         while (!stop)
         {
-            Stat[] statsCopy = node.getStats().toArray(new Stat[node.getStats().size()]);
+            Set<Stat> localStats = node.getLocalStats();
+            Stat[] statsCopy = localStats.toArray(new Stat[localStats.size()]);
 
             if (statsCopy.length > 0)
             {
@@ -84,6 +73,9 @@ public class NodeClient extends Thread
                 double mean = sum / statsCopy.length;
 
                 Stat globalStat = new Stat(mean, deltaTime());
+
+                // Store global stat
+                node.addGlobalStat(globalStat);
 
                 // Send global stat
                 String method = "/sendGlobalStat";
@@ -100,7 +92,7 @@ public class NodeClient extends Thread
 
                 // Send local stats
                 method = "/sendLocalStats";
-                input = gson.toJson(node.getStats());
+                input = gson.toJson(node.getLocalStats());
                 //            params = "/" + node.getStats();
 
                 resource = client.resource(nodesServices + method);
@@ -113,17 +105,18 @@ public class NodeClient extends Thread
 
 
 
-            // Print node Panel
-            System.out.println("\n");
-            System.out.println("Last local stats:");
-
-            Stat[] statArray = node.getStats().toArray(new Stat[node.getStats().size()]);
-            int loopDim = Math.min(statArray.length, 3);
-            for (int i = 0; i < loopDim; i++)
-                System.out.println("Node: " + node.getId() + "  " + statArray[statArray.length - 1 - i].getMean() + "  " + statArray[statArray.length - 1 - i].getTimestamp());
-
-            System.out.println();
-            System.out.print("Type \'q\' to remove the node from the Server Cloud: ");
+//            // Print node Panel
+//            System.out.println("\n");
+//            System.out.println("Last local stats:");
+//
+//            localStats = node.getLocalStats();
+//            Stat[] statArray = localStats.toArray(new Stat[localStats.size()]);
+//            int loopDim = Math.min(statArray.length, 3);
+//            for (int i = 0; i < loopDim; i++)
+//                System.out.println("Node: " + node.getId() + "  " + statArray[statArray.length - 1 - i].getMean() + "  " + statArray[statArray.length - 1 - i].getTimestamp());
+//
+//            System.out.println();
+//            System.out.print("Type \'q\' to remove the node from the Server Cloud: ");
 
             try {
                 // Dormi per 5 secondi

@@ -204,7 +204,8 @@ public class City
 
         Node node = getByID(id);
 
-        Stat[] stats = (Stat[]) node.getStats().toArray(new Stat[node.getStats().size()]);
+        Set<Stat> localStats = node.getLocalStats();
+        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
         int numStats = Math.min(n, stats.length);
 
@@ -250,7 +251,8 @@ public class City
     {
         Node node = getByID(id);
 
-        Stat[] stats = (Stat[]) node.getStats().toArray(new Stat[node.getStats().size()]);
+        Set<Stat> localStats = node.getLocalStats();
+        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
         double sum = 0;
 
@@ -275,7 +277,9 @@ public class City
     {
         Node node = getByID(id);
 
-        Stat[] stats = (Stat[]) node.getStats().toArray(new Stat[node.getStats().size()]);
+        Set<Stat> localStats = node.getLocalStats();
+
+        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
         double sum = 0;
 

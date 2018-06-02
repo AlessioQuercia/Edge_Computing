@@ -1,0 +1,20 @@
+syntax = "proto3";
+package beans;
+
+message LocalStatRequest
+{
+    double value = 1;
+    int64 timestamp = 2;
+}
+
+message GlobalStatResponse
+{
+	double value = 1;
+    int64 timestamp = 2;
+}
+
+// Defining a Service, a Service can have multiple RPC operations
+service NodeService 
+{
+    rpc streamToCoordinator(stream LocalStatRequest) returns (stream GlobalStatResponse);
+}

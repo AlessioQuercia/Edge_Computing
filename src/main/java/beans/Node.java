@@ -33,7 +33,9 @@ public class Node
 
     private String serverAddress;
 
-    private Set<Stat> stats;
+    private Set<Stat> globalStats;
+
+    private Set<Stat> localStats;
 
     public Node () {};
 
@@ -45,7 +47,8 @@ public class Node
         this.nodesPort = nodesPort;
         this.x = x;
         this.y = y;
-        this.stats = new TreeSet<Stat>();
+        this.globalStats = new TreeSet<Stat>();
+        this.localStats = new TreeSet<Stat>();
     }
 
     public int getId()
@@ -112,17 +115,22 @@ public class Node
 
     public void setServerAddress(String serverAddress) { this.serverAddress = serverAddress; }
 
-    public synchronized Set<Stat> getStats() {
-        return new TreeSet<Stat>(stats);
+    public Set<Stat> getGlobalStats() {
+        return new TreeSet<Stat>(globalStats);
     }
 
-    public synchronized void addStat(Stat stat)
+    public synchronized void addGlobalStat(Stat globalStat)
     {
-        stats.add(stat);
+        globalStats.add(globalStat);
     }
 
-    public synchronized void setStats(Set<Stat> stats) {
-        this.stats = stats;
+    public Set<Stat> getLocalStats() {
+        return new TreeSet<Stat>(localStats);
+    }
+
+    public synchronized void addLocalStat(Stat localStat)
+    {
+        localStats.add(localStat);
     }
 
     public static void main(String[] args)
@@ -134,7 +142,8 @@ public class Node
         int x;
         int y;
         String serverAddress = null;
-        ArrayList<Integer> stats;
+        Set<Stat> globalStats = new TreeSet<Stat>();
+        Set<Stat> localStats = new TreeSet<Stat>();
 
         ArrayList<Node> nodeList = null;
         Node thisNode = null;
@@ -253,15 +262,12 @@ public class Node
             }
 
             NodeServer nodeServer = new NodeServer(thisNode, state);
-            NodeClient nodeClient = null;
             nodeServer.start();
+
+            NodeClient nodeClient = null;
 
             switch (state)
             {
-                case NOT_COORDINATOR:
-                {
-                    break;
-                }
                 case COORDINATOR:
                 {
                     System.out.println("I am the Coordinator!");
@@ -269,6 +275,10 @@ public class Node
                     nodeClient = new NodeClient(thisNode, serverAddress);
                     nodeClient.start();
 
+                    break;
+                }
+                case NOT_COORDINATOR:
+                {
                     break;
                 }
                 case WAITING_COORDINATOR: break;
