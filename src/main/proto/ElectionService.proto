@@ -1,0 +1,19 @@
+syntax = "proto3";
+package beans;
+
+message ElectionRequest
+{
+	string status = 1;
+    int32 value = 2;
+}
+
+message ElectionResponse
+{
+    string ack = 1;
+}
+
+// Defining a Service, a Service can have multiple RPC operations
+service ElectionService 
+{
+    rpc sendElectionMessage(ElectionRequest) returns (ElectionResponse);
+}

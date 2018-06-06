@@ -17,6 +17,8 @@ public class ServerCloud {
         HttpServer server = HttpServerFactory.create("http://"+HOST+":"+PORT+"/");
         server.start();
 
+        System.out.println(104%101);
+
         System.out.println("Server running!");
         System.out.println("Server started on: http://"+HOST+":"+PORT);
 

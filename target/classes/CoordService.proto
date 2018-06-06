@@ -1,0 +1,30 @@
+syntax = "proto3";
+package beans;
+
+message NodeRequest
+{
+    int32 nodeId = 1;
+    string ipAddress = 2;
+    int32 sensorsPort = 3;
+    int32 nodesPort = 4;
+    int32 x = 5;
+    int32 y = 6;
+}
+
+message CoordResponse
+{
+    int32 coordPort = 1;
+}
+
+message NodeResponse
+{
+	string ack = 1;
+}
+
+// Defining a Service, a Service can have multiple RPC operations
+service CoordService 
+{
+    rpc askForCoordinator(NodeRequest) returns (CoordResponse);
+
+    rpc adviceNode(NodeRequest) returns (NodeResponse);
+}

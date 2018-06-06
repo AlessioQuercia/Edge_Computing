@@ -7,15 +7,14 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
-
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import simulators.Measurement;
-import simulators.SensorServiceImpl;
-
+import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
@@ -37,6 +36,22 @@ public class Node
 
     private Set<Stat> localStats;
 
+    private State state;
+
+    private static final int MAX_NODES = 101;
+
+    // Prossimi nodi nella struttura ad anello
+    private ArrayList<Node> nextNodes;
+
+    private ArrayList<Node> nodesList;
+
+    private NodeServer nodeServer;
+
+    private NodeClient nodeClient;
+
+    // Porta del coordinatore
+    private int coordinatorPort;
+
     public Node () {};
 
     public Node(int id, String ipAddress, int sensorsPort, int nodesPort, int x, int y)
@@ -49,6 +64,11 @@ public class Node
         this.y = y;
         this.globalStats = new TreeSet<Stat>();
         this.localStats = new TreeSet<Stat>();
+        this.state = State.NOT_COORDINATOR;
+        this.nextNodes = new ArrayList<Node>();
+        this.nodesList = new ArrayList<Node>();
+        this.nodeServer = null;
+        this.nodeClient = null;
     }
 
     public int getId()
@@ -229,8 +249,6 @@ public class Node
                             thisNode = nodeList.get(i);
                     }
 
-                    System.out.println(nodeList.toString());
-
                     validPosition = true;
                     break;
                 }
@@ -249,22 +267,24 @@ public class Node
 
         if (validPosition)
         {
+            thisNode.nodesList = nodeList;
+            thisNode.setServerAddress(serverAddress);
+
+            System.out.println(thisNode.getNextNodes());
+
             if (nodeList.size() == 1)
             {
                 //Il nodo è l'unico nella rete, perciò diventa il coordinatore.
                 state = State.COORDINATOR;
+                thisNode.setState(State.COORDINATOR);
+                thisNode.setCoordinatorPort(thisNode.nodesPort);
 
             }
             else
             {
-                //Il nodo non è l'unico nella rete, perciò deve presentarsi e chiedere chi è il coordinatore.
-
+                //Aggiorna la lista dei prossimi nodi nella struttura
+                thisNode.updateNextNodes(thisNode, nodeList);
             }
-
-            NodeServer nodeServer = new NodeServer(thisNode, state);
-            nodeServer.start();
-
-            NodeClient nodeClient = null;
 
             switch (state)
             {
@@ -272,18 +292,86 @@ public class Node
                 {
                     System.out.println("I am the Coordinator!");
 
-                    nodeClient = new NodeClient(thisNode, serverAddress);
-                    nodeClient.start();
+                    System.out.println(thisNode.getState());
+
+                    thisNode.setNodeClient(new NodeClient(thisNode, serverAddress));
+                    thisNode.nodeClient.start();
 
                     break;
                 }
                 case NOT_COORDINATOR:
                 {
+                    // Search for the coordinator
+                    // Chiede al nodo successivo nell'anello ((i+1)modN) se lui è il coordinatore
+                    Node nextNode = thisNode.getNextNodes().get(0);
+
+                    // Apre un canale con il nodo successivo e gli chiede chi è il coordinatore
+                    thisNode.setCoordinatorPort(thisNode.askForCoordinator(nextNode));
+
+                    // Avverte il nodo/i due nodi precedenti che si è aggiunto nella struttura e che farà parte dei loro prossimi nodi
+                    if (thisNode.getNodesList().size() < 2)
+                    {
+                        // Ci sono solo due nodi nella struttura, quindi il prossimo e il precedente sono lo stesso nodo
+                        Node previousNode = thisNode.getNextNodes().get(0);
+                        thisNode.sendUpdatePreviousNodeMessage(previousNode, thisNode);
+                    }
+                    else
+                    {
+                        System.out.println("CERCANDO I PRECEDENTI NELLA LISTA " + thisNode.getNodesList());
+                        // Ci sono più di due nodi nella struttura, quindi si calcola i due precedenti e li avvisa che è entrato
+                        boolean found[] = {false, false};
+                        int triess = MAX_NODES;
+                        int foundIndex = 0;
+                        ArrayList<Node> nodes = thisNode.getNodesList();
+                        nodes.remove(thisNode);
+                        while (triess > 0)
+                        {
+                            for (Node n : nodes)
+                            {
+                                if (n.getId() == (triess + thisNode.getId()) % (MAX_NODES))
+                                {
+                                    System.out.println("TROVATO PRECEDENTE: " + n);
+                                    found[foundIndex] = true;
+                                    foundIndex++;
+                                    thisNode.sendUpdatePreviousNodeMessage(n, thisNode);
+                                    break;
+                                }
+                            }
+
+                            if (found[0] && found[1])
+                                break;
+
+                            triess--;
+                        }
+                    }
+
+                    for (int i = 0; i<nodeList.size(); i++)
+                    {
+                        if (nodeList.get(i).getNodesPort() == thisNode.getCoordinatorPort())
+                            nodeList.get(i).setState(State.COORDINATOR);
+                    }
+
+                    System.out.println(thisNode.getNextNodes());
+
+//                    // Dopo aver conosciuto il nodo coordinatore, apre il servizio per eventuali richeste su chi sia il coordinatore
+//                    CoordServiceImpl coordService = new CoordServiceImpl(thisNode);
+//
+//                    ElectionServiceImpl electionService = new ElectionServiceImpl(thisNode);
+//
+//                    Server server = ServerBuilder.forPort(thisNode.getNodesPort()).
+//                            addService(coordService).
+//                            addService(electionService).
+//                            build();
+
                     break;
                 }
                 case WAITING_COORDINATOR: break;
                 case ELECTING_COORDINATOR: break;
             }
+
+            // In tutti i casi (coordinator o not_coordinator)
+            thisNode.setNodeServer(new NodeServer(thisNode));
+            thisNode.nodeServer.start();
 
             if (wantToExit())
             {
@@ -296,16 +384,17 @@ public class Node
                 {
                     // Vengono chiuse tutte le connessioni e il nodo esce
                     // CHIUDERE LA CONNESSIONE CON GLI ALTRI NODI
-                    nodeServer.setStop();
-                    nodeServer.getServer().shutdownNow();
+                    thisNode.nodeServer.setStop();
+                    thisNode.nodeServer.getServer().shutdownNow();
                     if (state == State.COORDINATOR)
                     {
-                        nodeClient.setStop();
-                        nodeClient.getConn().disconnect();
-                        nodeClient.getClient().destroy();
+                        thisNode.nodeClient.setStop();
+                        thisNode.nodeClient.getConn().disconnect();
+                        thisNode.nodeClient.getClient().destroy();
                     }
 //                    conn.disconnect();
 //                    c.destroy();
+
                 }
                 else
                 {
@@ -353,7 +442,8 @@ public class Node
                     }
                 }
                 argInt = Integer.parseInt(inFromUser.readLine().trim());
-                if (argInt > 0)
+                if ((argInt >= 0 && argInt < MAX_NODES && type == "ID")
+                        || argInt >= 0 && (type == "NODES_PORT" || type == "SENSORS_PORT") && Integer.toString(argInt).length() == 4)
                     validArg = true;
                 else
                 {
@@ -363,17 +453,17 @@ public class Node
             } catch (Exception e) {
                 switch (type) {
                     case "ID": {
-                        System.out.println("ID inserito non valido. L'ID deve essere un intero positivo.");
+                        System.out.println("ID inserito non valido. L'ID deve essere un intero compreso tra 0 e 99.");
                         break;
                     }
                     case "NODES_PORT":
                     {
-                        System.out.println("Numero di porta inserito non valido. Il numero di porta deve essere un intero positivo.");
+                        System.out.println("Numero di porta inserito non valido. Il numero di porta deve essere un intero positivo di 4 cifre.");
                         break;
                     }
                     case "SENSORS_PORT":
                     {
-                        System.out.println("Numero di porta inserito non valido. Il numero di porta deve essere un intero positivo.");
+                        System.out.println("Numero di porta inserito non valido. Il numero di porta deve essere un intero positivo di 4 cifre.");
                         break;
                     }
                 }
@@ -418,5 +508,184 @@ public class Node
             }
         }
         return true;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public void updateNextNodes(Node thisNode, ArrayList<Node> nodeList)
+    {
+        ArrayList<Node> nodes = nodeList;
+        nodes.remove(thisNode);
+
+        nextNodes = new ArrayList<Node>();
+
+        if (nodes.size() < 2)
+        {
+            for (int i = 0; i < nodes.size(); i++)
+            {
+                nextNodes.add(nodes.get(i));
+            }
+        }
+        else
+        {
+//            Set<Double> orderedDistances = new TreeSet<Double>();
+//            for (Node n : nodes)
+//            {
+//                double dist = Math.abs(getX() - n.getX()) + Math.abs(getY() - n.getY());
+//                orderedDistances.add(dist);
+//            }
+//
+//            Double[] orderedList = orderedDistances.toArray(new Double[orderedDistances.size()]);
+//            for (Node n : nodes)
+//            {
+//                double dist = Math.abs(getX() - n.getX()) + Math.abs(getY() - n.getY());
+//                if (orderedList[0] == dist)
+//                    nextNodes.add(0, n);
+//            }
+//            for (Node n : nodes)
+//            {
+//                double dist = Math.abs(getX() - n.getX()) + Math.abs(getY() - n.getY());
+//                if (orderedList[1] == dist)
+//                    nextNodes.add(1, n);
+//            }
+
+            boolean found[] = {false, false};
+            int tries = 1;
+            int foundIndex = 0;
+            while (tries <= 100)
+            {
+                for (int i = 0; i < nodes.size(); i++)
+                {
+                    if (nodes.get(i).getId() == (thisNode.getId() + tries) % (MAX_NODES))
+                    {
+                        nextNodes.add(nodes.get(i));
+//                        System.out.println(nextNodes);
+                        found[foundIndex] = true;
+                        foundIndex++;
+                        break;
+                    }
+                }
+
+                if (found[0] && found[1])
+                    break;
+
+                tries++;
+            }
+        }
+    }
+
+    public ArrayList<Node> getNextNodes()
+    {
+        return nextNodes;
+    }
+
+    public int askForCoordinator(Node nextNode)
+    {
+        //plaintext channel on the address (ip/port) which offers the MethodsService service
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + nextNode.getNodesPort()).usePlaintext(true).build();
+
+        //creating a blocking stub on the channel
+        CoordServiceGrpc.CoordServiceBlockingStub stub = CoordServiceGrpc.newBlockingStub(channel);
+
+        //creating the HelloResponse object which will be provided as input to the RPC method
+        CoordServiceOuterClass.NodeRequest request = CoordServiceOuterClass.NodeRequest.newBuilder().
+                setNodeId(id).
+                setIpAddress(ipAddress).
+                setNodesPort(nodesPort).
+                setSensorsPort(sensorsPort).
+                setX(x).
+                setY(y).
+                build();
+
+        //calling the method. it returns an instance of HelloResponse
+        CoordServiceOuterClass.CoordResponse response = stub.askForCoordinator(request);
+
+        int coordPort = response.getCoordPort();
+
+        //closing the channel
+        channel.shutdown();
+
+        return coordPort;
+    }
+
+    public int getCoordinatorPort()
+    {
+        return coordinatorPort;
+    }
+
+    public void setCoordinatorPort(int coordinatorPort)
+    {
+        this.coordinatorPort = coordinatorPort;
+    }
+
+    public ArrayList<Node> getNodesList()
+    {
+        return nodesList;
+    }
+
+    public void sendElectionMessage(Node nextNode, String requestStatus, int requestValue)
+    {
+        //plaintext channel on the address (ip/port) which offers the MethodsService service
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + nextNode.getNodesPort()).usePlaintext(true).build();
+
+        //creating a blocking stub on the channel
+        ElectionServiceGrpc.ElectionServiceBlockingStub stub = ElectionServiceGrpc.newBlockingStub(channel);
+
+        //creating the HelloResponse object which will be provided as input to the RPC method
+        ElectionServiceOuterClass.ElectionRequest request = ElectionServiceOuterClass.ElectionRequest.newBuilder().
+                setStatus(requestStatus).setValue(requestValue).build();
+
+        //calling the method. it returns an instance of HelloResponse
+        ElectionServiceOuterClass.ElectionResponse response = stub.sendElectionMessage(request);
+
+        //closing the channel
+        channel.shutdown();
+    }
+
+    public void sendUpdatePreviousNodeMessage(Node nodeToAdvise, Node node)
+    {
+        //plaintext channel on the address (ip/port) which offers the MethodsService service
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + nodeToAdvise.getNodesPort()).usePlaintext(true).build();
+
+        //creating a blocking stub on the channel
+        CoordServiceGrpc.CoordServiceBlockingStub stub = CoordServiceGrpc.newBlockingStub(channel);
+
+        //creating the HelloResponse object which will be provided as input to the RPC method
+        CoordServiceOuterClass.NodeRequest request = CoordServiceOuterClass.NodeRequest.newBuilder().
+                setNodeId(node.getId()).
+                setIpAddress(node.getIpAddress()).
+                setNodesPort(node.getNodesPort()).
+                setSensorsPort(node.getSensorsPort()).
+                setX(node.getX()).
+                setY(node.getY()).
+                build();
+
+        //calling the method. it returns an instance of HelloResponse
+        CoordServiceOuterClass.NodeResponse response = stub.adviceNode(request);
+
+        //closing the channel
+        channel.shutdown();
+    }
+
+    public NodeServer getNodeServer() {
+        return nodeServer;
+    }
+
+    public void setNodeServer(NodeServer nodeServer) {
+        this.nodeServer = nodeServer;
+    }
+
+    public NodeClient getNodeClient() {
+        return nodeClient;
+    }
+
+    public void setNodeClient(NodeClient nodeClient) {
+        this.nodeClient = nodeClient;
     }
 }
