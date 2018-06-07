@@ -19,9 +19,6 @@ public class Analist
     {
         Client c = Client.create();
 
-        String address;
-        int port;
-
         String serverAddress = null;
 
         /* Inizializza l’input stream (da tastiera) */
@@ -38,10 +35,7 @@ public class Analist
             try
             {
                 System.out.print("Inserire l'indirizzo del server cloud: ");
-                address = inFromUser.readLine();
-                System.out.print("Inserire il numero di porta del server cloud: ");
-                port = Integer.parseInt(inFromUser.readLine().trim());
-                serverAddress = "http://" + address + ":" + port;
+                serverAddress = inFromUser.readLine();
                 url = new URL(serverAddress);
                 conn = (HttpURLConnection) url.openConnection();
                 conn.connect();
@@ -135,8 +129,7 @@ public class Analist
                     }
                 }
 
-            if (!end)
-            {
+            if (!end) {
                 String params = id + n;
 
                 resource = c.resource(analistsServices + method + params);
@@ -149,25 +142,31 @@ public class Analist
 
                 showAvailableActions("NEXT_ACTION");
 
-                try
-                {
-                    selectedService = Integer.parseInt(inFromUser.readLine().trim());
-                    if (selectedService > 9 || selectedService <= 0)
-                        throw new IOException();
+                boolean nextActionSelected = false;
 
-                    switch (selectedService) {
-                        case 1: { break; }
-                        case 2: {
-                            conn.disconnect();
-                            end = true;
-                            break;
-                        }
-                    }
-                }
-                catch (IOException e)
+                while (!nextActionSelected)
                 {
-//                e.printStackTrace();
-                    System.out.println("Not a valid service. Please select a valid service.");
+                    try {
+                        selectedService = Integer.parseInt(inFromUser.readLine().trim());
+                        if (selectedService > 9 || selectedService <= 0)
+                            throw new IOException();
+
+                        switch (selectedService) {
+                            case 1: {
+                                nextActionSelected = true;
+                                break;
+                            }
+                            case 2: {
+                                nextActionSelected = true;
+                                conn.disconnect();
+                                end = true;
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        //                e.printStackTrace();
+                        System.out.println("Not a valid service. Please select a valid service.");
+                    }
                 }
 
                 id = "";
@@ -242,7 +241,7 @@ public class Analist
                     throw new IOException();
                 else
                     validAction = true;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 //                e.printStackTrace();
                 System.out.println("Not a valid service. Please select a valid service.");
             }

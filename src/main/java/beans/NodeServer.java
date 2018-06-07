@@ -128,7 +128,7 @@ public class NodeServer extends Thread
                         double mean = sum / 40;
 
                         // Crea la statistica locale
-                        Stat localStat = new Stat(mean, deltaTime());
+                        Stat localStat = new Stat(node.getId(), mean, deltaTime());
 
                         switch (node.getState())
                         {
@@ -277,7 +277,7 @@ public class NodeServer extends Thread
                 // Se sono presenti statistiche globali (quindi ne è stata inviata una) allora salvala
                 if (response != null)
                 {
-                    Stat globalStat = new Stat(response.getValue(), response.getTimestamp());
+                    Stat globalStat = new Stat(response.getNodeId(), response.getValue(), response.getTimestamp());
 
 //                    System.out.println("Global stat ricevuta: " + globalStat);
 

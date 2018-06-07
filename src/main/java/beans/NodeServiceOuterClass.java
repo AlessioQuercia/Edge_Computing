@@ -19,12 +19,17 @@ public final class NodeServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>double value = 1;</code>
+     * <code>int32 nodeId = 1;</code>
+     */
+    int getNodeId();
+
+    /**
+     * <code>double value = 2;</code>
      */
     double getValue();
 
     /**
-     * <code>int64 timestamp = 2;</code>
+     * <code>int64 timestamp = 3;</code>
      */
     long getTimestamp();
   }
@@ -41,6 +46,7 @@ public final class NodeServiceOuterClass {
       super(builder);
     }
     private LocalStatRequest() {
+      nodeId_ = 0;
       value_ = 0D;
       timestamp_ = 0L;
     }
@@ -76,12 +82,17 @@ public final class NodeServiceOuterClass {
               }
               break;
             }
-            case 9: {
+            case 8: {
+
+              nodeId_ = input.readInt32();
+              break;
+            }
+            case 17: {
 
               value_ = input.readDouble();
               break;
             }
-            case 16: {
+            case 24: {
 
               timestamp_ = input.readInt64();
               break;
@@ -110,19 +121,28 @@ public final class NodeServiceOuterClass {
               beans.NodeServiceOuterClass.LocalStatRequest.class, beans.NodeServiceOuterClass.LocalStatRequest.Builder.class);
     }
 
-    public static final int VALUE_FIELD_NUMBER = 1;
+    public static final int NODEID_FIELD_NUMBER = 1;
+    private int nodeId_;
+    /**
+     * <code>int32 nodeId = 1;</code>
+     */
+    public int getNodeId() {
+      return nodeId_;
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 2;
     private double value_;
     /**
-     * <code>double value = 1;</code>
+     * <code>double value = 2;</code>
      */
     public double getValue() {
       return value_;
     }
 
-    public static final int TIMESTAMP_FIELD_NUMBER = 2;
+    public static final int TIMESTAMP_FIELD_NUMBER = 3;
     private long timestamp_;
     /**
-     * <code>int64 timestamp = 2;</code>
+     * <code>int64 timestamp = 3;</code>
      */
     public long getTimestamp() {
       return timestamp_;
@@ -140,11 +160,14 @@ public final class NodeServiceOuterClass {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (nodeId_ != 0) {
+        output.writeInt32(1, nodeId_);
+      }
       if (value_ != 0D) {
-        output.writeDouble(1, value_);
+        output.writeDouble(2, value_);
       }
       if (timestamp_ != 0L) {
-        output.writeInt64(2, timestamp_);
+        output.writeInt64(3, timestamp_);
       }
       unknownFields.writeTo(output);
     }
@@ -154,13 +177,17 @@ public final class NodeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (nodeId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, nodeId_);
+      }
       if (value_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1, value_);
+          .computeDoubleSize(2, value_);
       }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, timestamp_);
+          .computeInt64Size(3, timestamp_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -178,6 +205,8 @@ public final class NodeServiceOuterClass {
       beans.NodeServiceOuterClass.LocalStatRequest other = (beans.NodeServiceOuterClass.LocalStatRequest) obj;
 
       boolean result = true;
+      result = result && (getNodeId()
+          == other.getNodeId());
       result = result && (
           java.lang.Double.doubleToLongBits(getValue())
           == java.lang.Double.doubleToLongBits(
@@ -195,6 +224,8 @@ public final class NodeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NODEID_FIELD_NUMBER;
+      hash = (53 * hash) + getNodeId();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getValue()));
@@ -330,6 +361,8 @@ public final class NodeServiceOuterClass {
       }
       public Builder clear() {
         super.clear();
+        nodeId_ = 0;
+
         value_ = 0D;
 
         timestamp_ = 0L;
@@ -356,6 +389,7 @@ public final class NodeServiceOuterClass {
 
       public beans.NodeServiceOuterClass.LocalStatRequest buildPartial() {
         beans.NodeServiceOuterClass.LocalStatRequest result = new beans.NodeServiceOuterClass.LocalStatRequest(this);
+        result.nodeId_ = nodeId_;
         result.value_ = value_;
         result.timestamp_ = timestamp_;
         onBuilt();
@@ -399,6 +433,9 @@ public final class NodeServiceOuterClass {
 
       public Builder mergeFrom(beans.NodeServiceOuterClass.LocalStatRequest other) {
         if (other == beans.NodeServiceOuterClass.LocalStatRequest.getDefaultInstance()) return this;
+        if (other.getNodeId() != 0) {
+          setNodeId(other.getNodeId());
+        }
         if (other.getValue() != 0D) {
           setValue(other.getValue());
         }
@@ -432,15 +469,41 @@ public final class NodeServiceOuterClass {
         return this;
       }
 
+      private int nodeId_ ;
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public int getNodeId() {
+        return nodeId_;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder setNodeId(int value) {
+        
+        nodeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder clearNodeId() {
+        
+        nodeId_ = 0;
+        onChanged();
+        return this;
+      }
+
       private double value_ ;
       /**
-       * <code>double value = 1;</code>
+       * <code>double value = 2;</code>
        */
       public double getValue() {
         return value_;
       }
       /**
-       * <code>double value = 1;</code>
+       * <code>double value = 2;</code>
        */
       public Builder setValue(double value) {
         
@@ -449,7 +512,7 @@ public final class NodeServiceOuterClass {
         return this;
       }
       /**
-       * <code>double value = 1;</code>
+       * <code>double value = 2;</code>
        */
       public Builder clearValue() {
         
@@ -460,13 +523,13 @@ public final class NodeServiceOuterClass {
 
       private long timestamp_ ;
       /**
-       * <code>int64 timestamp = 2;</code>
+       * <code>int64 timestamp = 3;</code>
        */
       public long getTimestamp() {
         return timestamp_;
       }
       /**
-       * <code>int64 timestamp = 2;</code>
+       * <code>int64 timestamp = 3;</code>
        */
       public Builder setTimestamp(long value) {
         
@@ -475,7 +538,7 @@ public final class NodeServiceOuterClass {
         return this;
       }
       /**
-       * <code>int64 timestamp = 2;</code>
+       * <code>int64 timestamp = 3;</code>
        */
       public Builder clearTimestamp() {
         
@@ -537,12 +600,17 @@ public final class NodeServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>double value = 1;</code>
+     * <code>int32 nodeId = 1;</code>
+     */
+    int getNodeId();
+
+    /**
+     * <code>double value = 2;</code>
      */
     double getValue();
 
     /**
-     * <code>int64 timestamp = 2;</code>
+     * <code>int64 timestamp = 3;</code>
      */
     long getTimestamp();
   }
@@ -559,6 +627,7 @@ public final class NodeServiceOuterClass {
       super(builder);
     }
     private GlobalStatResponse() {
+      nodeId_ = 0;
       value_ = 0D;
       timestamp_ = 0L;
     }
@@ -594,12 +663,17 @@ public final class NodeServiceOuterClass {
               }
               break;
             }
-            case 9: {
+            case 8: {
+
+              nodeId_ = input.readInt32();
+              break;
+            }
+            case 17: {
 
               value_ = input.readDouble();
               break;
             }
-            case 16: {
+            case 24: {
 
               timestamp_ = input.readInt64();
               break;
@@ -628,19 +702,28 @@ public final class NodeServiceOuterClass {
               beans.NodeServiceOuterClass.GlobalStatResponse.class, beans.NodeServiceOuterClass.GlobalStatResponse.Builder.class);
     }
 
-    public static final int VALUE_FIELD_NUMBER = 1;
+    public static final int NODEID_FIELD_NUMBER = 1;
+    private int nodeId_;
+    /**
+     * <code>int32 nodeId = 1;</code>
+     */
+    public int getNodeId() {
+      return nodeId_;
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 2;
     private double value_;
     /**
-     * <code>double value = 1;</code>
+     * <code>double value = 2;</code>
      */
     public double getValue() {
       return value_;
     }
 
-    public static final int TIMESTAMP_FIELD_NUMBER = 2;
+    public static final int TIMESTAMP_FIELD_NUMBER = 3;
     private long timestamp_;
     /**
-     * <code>int64 timestamp = 2;</code>
+     * <code>int64 timestamp = 3;</code>
      */
     public long getTimestamp() {
       return timestamp_;
@@ -658,11 +741,14 @@ public final class NodeServiceOuterClass {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (nodeId_ != 0) {
+        output.writeInt32(1, nodeId_);
+      }
       if (value_ != 0D) {
-        output.writeDouble(1, value_);
+        output.writeDouble(2, value_);
       }
       if (timestamp_ != 0L) {
-        output.writeInt64(2, timestamp_);
+        output.writeInt64(3, timestamp_);
       }
       unknownFields.writeTo(output);
     }
@@ -672,13 +758,17 @@ public final class NodeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (nodeId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, nodeId_);
+      }
       if (value_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1, value_);
+          .computeDoubleSize(2, value_);
       }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, timestamp_);
+          .computeInt64Size(3, timestamp_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -696,6 +786,8 @@ public final class NodeServiceOuterClass {
       beans.NodeServiceOuterClass.GlobalStatResponse other = (beans.NodeServiceOuterClass.GlobalStatResponse) obj;
 
       boolean result = true;
+      result = result && (getNodeId()
+          == other.getNodeId());
       result = result && (
           java.lang.Double.doubleToLongBits(getValue())
           == java.lang.Double.doubleToLongBits(
@@ -713,6 +805,8 @@ public final class NodeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NODEID_FIELD_NUMBER;
+      hash = (53 * hash) + getNodeId();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getValue()));
@@ -848,6 +942,8 @@ public final class NodeServiceOuterClass {
       }
       public Builder clear() {
         super.clear();
+        nodeId_ = 0;
+
         value_ = 0D;
 
         timestamp_ = 0L;
@@ -874,6 +970,7 @@ public final class NodeServiceOuterClass {
 
       public beans.NodeServiceOuterClass.GlobalStatResponse buildPartial() {
         beans.NodeServiceOuterClass.GlobalStatResponse result = new beans.NodeServiceOuterClass.GlobalStatResponse(this);
+        result.nodeId_ = nodeId_;
         result.value_ = value_;
         result.timestamp_ = timestamp_;
         onBuilt();
@@ -917,6 +1014,9 @@ public final class NodeServiceOuterClass {
 
       public Builder mergeFrom(beans.NodeServiceOuterClass.GlobalStatResponse other) {
         if (other == beans.NodeServiceOuterClass.GlobalStatResponse.getDefaultInstance()) return this;
+        if (other.getNodeId() != 0) {
+          setNodeId(other.getNodeId());
+        }
         if (other.getValue() != 0D) {
           setValue(other.getValue());
         }
@@ -950,15 +1050,41 @@ public final class NodeServiceOuterClass {
         return this;
       }
 
+      private int nodeId_ ;
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public int getNodeId() {
+        return nodeId_;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder setNodeId(int value) {
+        
+        nodeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder clearNodeId() {
+        
+        nodeId_ = 0;
+        onChanged();
+        return this;
+      }
+
       private double value_ ;
       /**
-       * <code>double value = 1;</code>
+       * <code>double value = 2;</code>
        */
       public double getValue() {
         return value_;
       }
       /**
-       * <code>double value = 1;</code>
+       * <code>double value = 2;</code>
        */
       public Builder setValue(double value) {
         
@@ -967,7 +1093,7 @@ public final class NodeServiceOuterClass {
         return this;
       }
       /**
-       * <code>double value = 1;</code>
+       * <code>double value = 2;</code>
        */
       public Builder clearValue() {
         
@@ -978,13 +1104,13 @@ public final class NodeServiceOuterClass {
 
       private long timestamp_ ;
       /**
-       * <code>int64 timestamp = 2;</code>
+       * <code>int64 timestamp = 3;</code>
        */
       public long getTimestamp() {
         return timestamp_;
       }
       /**
-       * <code>int64 timestamp = 2;</code>
+       * <code>int64 timestamp = 3;</code>
        */
       public Builder setTimestamp(long value) {
         
@@ -993,7 +1119,7 @@ public final class NodeServiceOuterClass {
         return this;
       }
       /**
-       * <code>int64 timestamp = 2;</code>
+       * <code>int64 timestamp = 3;</code>
        */
       public Builder clearTimestamp() {
         
@@ -1069,12 +1195,13 @@ public final class NodeServiceOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021NodeService.proto\022\005beans\"4\n\020LocalStatR" +
-      "equest\022\r\n\005value\030\001 \001(\001\022\021\n\ttimestamp\030\002 \001(\003" +
-      "\"6\n\022GlobalStatResponse\022\r\n\005value\030\001 \001(\001\022\021\n" +
-      "\ttimestamp\030\002 \001(\0032\\\n\013NodeService\022M\n\023strea" +
-      "mToCoordinator\022\027.beans.LocalStatRequest\032" +
-      "\031.beans.GlobalStatResponse(\0010\001b\006proto3"
+      "\n\021NodeService.proto\022\005beans\"D\n\020LocalStatR" +
+      "equest\022\016\n\006nodeId\030\001 \001(\005\022\r\n\005value\030\002 \001(\001\022\021\n" +
+      "\ttimestamp\030\003 \001(\003\"F\n\022GlobalStatResponse\022\016" +
+      "\n\006nodeId\030\001 \001(\005\022\r\n\005value\030\002 \001(\001\022\021\n\ttimesta" +
+      "mp\030\003 \001(\0032\\\n\013NodeService\022M\n\023streamToCoord" +
+      "inator\022\027.beans.LocalStatRequest\032\031.beans." +
+      "GlobalStatResponse(\0010\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1093,13 +1220,13 @@ public final class NodeServiceOuterClass {
     internal_static_beans_LocalStatRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_beans_LocalStatRequest_descriptor,
-        new java.lang.String[] { "Value", "Timestamp", });
+        new java.lang.String[] { "NodeId", "Value", "Timestamp", });
     internal_static_beans_GlobalStatResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_beans_GlobalStatResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_beans_GlobalStatResponse_descriptor,
-        new java.lang.String[] { "Value", "Timestamp", });
+        new java.lang.String[] { "NodeId", "Value", "Timestamp", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

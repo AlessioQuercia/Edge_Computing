@@ -27,7 +27,7 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
             public void onNext(NodeServiceOuterClass.LocalStatRequest request)
             {
                 // Aggiunge la statistica locale alle statistiche locali
-                Stat localStat = new Stat(request.getValue(), request.getTimestamp());
+                Stat localStat = new Stat(request.getNodeId(), request.getValue(), request.getTimestamp());
 
                 coordinator.addLocalStat(localStat);
 

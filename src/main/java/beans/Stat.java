@@ -5,13 +5,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "stat")
 public class Stat implements Comparable<Stat>
 {
+    private int nodeId;
     private double mean;
     private long timestamp;
 
     public Stat() {};
 
-    public Stat(double mean, long timestamp)
+    public Stat(int nodeId, double mean, long timestamp)
     {
+        this.nodeId = nodeId;
         this.mean = mean;
         this.timestamp = timestamp;
     }
@@ -31,6 +33,10 @@ public class Stat implements Comparable<Stat>
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+    public int getNodeId() { return nodeId; }
+
+    public void setNodeId(int nodeId) { this.nodeId = nodeId; }
 
     @Override
     public int compareTo(Stat o)

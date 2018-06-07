@@ -2,7 +2,7 @@ package beans;
 
 public class GlobalStat extends Stat
 {
-    public GlobalStat(double mean, long timestamp) {
-        super(mean, timestamp);
+    public GlobalStat(int nodeId, double mean, long timestamp) {
+        super(nodeId, mean, timestamp);
     }
 }

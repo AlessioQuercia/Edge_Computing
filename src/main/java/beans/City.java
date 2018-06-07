@@ -202,15 +202,19 @@ public class City
     {
         Set<Stat> nodesLastStats = new TreeSet<Stat>();
 
-        Node node = getByID(id);
+//        Node node = getByID(id);
+//
+//        Set<Stat> localStats = node.getLocalStats();
+//        System.out.println(localStats);
+//        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
-        Set<Stat> localStats = node.getLocalStats();
         Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
         int numStats = Math.min(n, stats.length);
 
         for (int i=0; i<numStats; i++)
-            nodesLastStats.add(stats[stats.length-1-i]);
+            if(stats[stats.length-1-i].getNodeId() == id)
+                nodesLastStats.add(stats[stats.length-1-i]);
 
         return nodesLastStats;
     }
@@ -249,44 +253,49 @@ public class City
 
     public double getNodeStatsStandardDeviation(int id, int n)
     {
-        Node node = getByID(id);
+//        Node node = getByID(id);
+//
+//        Set<Stat> localStats = node.getLocalStats();
+//        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
-        Set<Stat> localStats = node.getLocalStats();
         Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
-
-        double sum = 0;
 
         int numStats = Math.min(n, stats.length);
 
-        for (int i=0; i<numStats; i++)
-            sum += stats[i].getMean();
+        double sum = 0;
 
-        double mean = sum/n;
+        ArrayList<Stat> selectedStats = new ArrayList<Stat>();
+
+        for (int i=0; i<numStats; i++)
+            if(stats[stats.length-1-i].getNodeId() == id) {
+                sum += stats[stats.length - 1 - i].getMean();
+                selectedStats.add(stats[stats.length - 1 - i]);
+            }
+
+        double mean = sum/numStats;
 
         double value = 0;
 
-        for (int i=0; i<n; i++)
-            value += Math.pow((stats[i].getMean() - mean), 2);
+        for (int i=0; i<numStats; i++)
+            value += Math.pow((selectedStats.get(i).getMean() - mean), 2);
 
-        double stdDev = Math.sqrt(value/n);
+        double stdDev = Math.sqrt(value/numStats);
 
         return stdDev;
     }
 
     public double getNodeStatsMean(int id, int n)
     {
-        Node node = getByID(id);
-
-        Set<Stat> localStats = node.getLocalStats();
-
         Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
-
-        double sum = 0;
 
         int numStats = Math.min(n, stats.length);
 
+        double sum = 0;
+
         for (int i=0; i<numStats; i++)
-            sum += stats[i].getMean();
+            if(stats[stats.length-1-i].getNodeId() == id) {
+                sum += stats[stats.length - 1 - i].getMean();
+            }
 
         double mean = sum/n;
 
@@ -304,16 +313,16 @@ public class City
         int numStats = Math.min(n, stats.length);
 
         for (int i=0; i<numStats; i++)
-            sum += stats[i].getMean();
+            sum += stats[stats.length - 1 - i].getMean();
 
-        double mean = sum/n;
+        double mean = sum/numStats;
 
         double value = 0;
 
         for (int i=0; i<numStats; i++)
-            value += Math.pow((stats[i].getMean() - mean), 2);
+            value += Math.pow((stats[stats.length - 1 - i].getMean() - mean), 2);
 
-        double stdDev = Math.sqrt(value/n);
+        double stdDev = Math.sqrt(value/numStats);
 
         return stdDev;
     }
@@ -329,9 +338,9 @@ public class City
         int numStats = Math.min(n, stats.length);
 
         for (int i=0; i<numStats; i++)
-            sum += stats[i].getMean();
+            sum += stats[stats.length - 1 - i].getMean();
 
-        double mean = sum/n;
+        double mean = sum/numStats;
 
         return mean;
     }

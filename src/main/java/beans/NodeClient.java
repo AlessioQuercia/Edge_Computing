@@ -72,7 +72,7 @@ public class NodeClient extends Thread
 
                 double mean = sum / statsCopy.length;
 
-                Stat globalStat = new Stat(mean, deltaTime());
+                Stat globalStat = new Stat(node.getId(), mean, deltaTime());
 
                 // Store global stat
                 node.addGlobalStat(globalStat);
