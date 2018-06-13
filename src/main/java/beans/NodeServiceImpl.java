@@ -1,17 +1,15 @@
 package beans;
 
 import io.grpc.stub.StreamObserver;
-import simulators.Measurement;
-import simulators.SensorServiceGrpc;
-import simulators.SensorServiceOuterClass;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
-import java.util.TreeSet;
 
 public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
 {
     private Node coordinator;
+
+    private HashMap<StreamObserver, Integer> observers = new HashMap<StreamObserver, Integer>();
 
     public NodeServiceImpl(Node coordinator)
     {
@@ -26,12 +24,25 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
             @Override
             public void onNext(NodeServiceOuterClass.LocalStatRequest request)
             {
-                // Aggiunge la statistica locale alle statistiche locali
-                Stat localStat = new Stat(request.getNodeId(), request.getValue(), request.getTimestamp());
+                StatMessage localStatMessage = new StatMessage("localStatFromNode", request.getTimestamp(),
+                        request.getNodeId(), request.getValue());
 
-                coordinator.addLocalStat(localStat);
+                coordinator.getMessagesBuffer().put(localStatMessage);
 
-                Set<Stat> globalStats = coordinator.getGlobalStats();
+
+                synchronized (observers) {
+                    if (observers.get(responseObserver) == null)
+                    {
+                        observers.put(responseObserver, request.getNodeId());
+                    }
+                }
+
+//                // Aggiunge la statistica locale alle statistiche locali
+//                Stat localStat = new Stat(request.getNodeId(), request.getValue(), request.getTimestamp());
+//
+//                coordinator.addLocalStat(localStat);
+
+                Set<Stat> globalStats = coordinator.getGlobalStatsCopy();
 
                 NodeServiceOuterClass.GlobalStatResponse response = null;
 
@@ -39,8 +50,11 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
                     // Costruisco la risposta con la global stat più recente
                     Stat globalStat = (Stat) globalStats.toArray()[globalStats.size()-1];
 
-                    response = NodeServiceOuterClass.GlobalStatResponse.newBuilder().
-                            setValue(globalStat.getMean()).setTimestamp(globalStat.getTimestamp()).build();
+                    response = NodeServiceOuterClass.GlobalStatResponse.newBuilder()
+                            .setNodeId(coordinator.getId())
+                            .setValue(globalStat.getMean())
+                            .setTimestamp(globalStat.getTimestamp())
+                            .build();
                 }
 
                 responseObserver.onNext(response);
@@ -49,7 +63,41 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
             @Override
             public void onError(Throwable throwable)
             {
-                System.out.println("Errore! " + throwable.getMessage());
+                synchronized (observers)
+                {
+                    int crashedNodeId = observers.get(responseObserver);
+
+                    if (coordinator.getNodeFromNodesList(crashedNodeId) != null && !coordinator.getNodeServerToNodes().isStop()) {
+
+                        System.out.println("RIMOSSO NODO " + crashedNodeId);
+
+                        observers.remove(responseObserver);
+
+                        Node removedNode = coordinator.getNodeFromNodesList(crashedNodeId);
+
+                        synchronized(coordinator.getRemovedNodes())
+                        {
+                            coordinator.getRemovedNodes().add(removedNode);
+                        }
+
+                        System.out.println(removedNode);
+
+                        coordinator.removeNodeFromNodesList(crashedNodeId);
+                    }
+
+                }
+
+                observers.remove(responseObserver);
+
+//                System.out.println("Comunicazione con il nodo " + senderId + " interrotta!");
+//
+//                // DA FARE SOLO UNA VOLTA
+//
+//                Node removedNode = coordinator.getNodeFromNodesList(senderId);
+//
+//                coordinator.removeNodeFromNodesList(senderId);
+//
+//                coordinator.advicePreviousNodes(coordinator, removedNode, "RIMOSSO");
             }
 
             @Override

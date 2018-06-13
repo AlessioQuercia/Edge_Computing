@@ -9,16 +9,22 @@ message NodeRequest
     int32 nodesPort = 4;
     int32 x = 5;
     int32 y = 6;
+    string type = 7;
+    int64 timestamp = 8;
 }
 
 message CoordResponse
 {
-    int32 coordPort = 1;
+	int32 nodeId = 1;
+    int32 coordPort = 2;
+    int64 timestamp = 3;
 }
 
 message NodeResponse
 {
-	string ack = 1;
+	int32 nodeId = 1;
+	string ack = 2;
+	int64 timestamp = 3;
 }
 
 // Defining a Service, a Service can have multiple RPC operations
@@ -27,4 +33,6 @@ service CoordService
     rpc askForCoordinator(NodeRequest) returns (CoordResponse);
 
     rpc adviceNode(NodeRequest) returns (NodeResponse);
+
+    rpc hiCoordinator(NodeRequest) returns (NodeResponse);
 }

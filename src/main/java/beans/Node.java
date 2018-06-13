@@ -9,12 +9,10 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
@@ -45,12 +43,29 @@ public class Node
 
     private ArrayList<Node> nodesList;
 
-    private NodeServer nodeServer;
+//    private NodeServer nodeServer;
 
     private NodeClient nodeClient;
 
     // Porta del coordinatore
     private int coordinatorPort;
+//    private SensorServiceImpl sensorsService;
+//    private Server sensorsServer;
+
+    private MessagesBuffer messagesBuffer;
+
+    private NodeServerToSensors nodeServerToSensors;
+    private NodeServerToNodes nodeServerToNodes;
+
+    private long midnight;
+
+    public ArrayList<Node> getRemovedNodes() {
+        return removedNodes;
+    }
+
+    private ArrayList<Node> removedNodes;
+
+    Object waitForCoordinator = new Object();
 
     public Node () {};
 
@@ -67,8 +82,12 @@ public class Node
         this.state = State.NOT_COORDINATOR;
         this.nextNodes = new ArrayList<Node>();
         this.nodesList = new ArrayList<Node>();
-        this.nodeServer = null;
+//        this.nodeServer = null;
         this.nodeClient = null;
+        this.messagesBuffer = new MessagesBuffer();
+        this.midnight = computeMidnightMilliseconds();
+        this.removedNodes = new ArrayList<Node>();
+        this.coordinatorPort = -1;
     }
 
     public int getId()
@@ -135,22 +154,213 @@ public class Node
 
     public void setServerAddress(String serverAddress) { this.serverAddress = serverAddress; }
 
-    public Set<Stat> getGlobalStats() {
-        return new TreeSet<Stat>(globalStats);
-    }
-
-    public synchronized void addGlobalStat(Stat globalStat)
+    public Set<Stat> getGlobalStats()
     {
-        globalStats.add(globalStat);
+        return globalStats;
     }
 
-    public Set<Stat> getLocalStats() {
-        return new TreeSet<Stat>(localStats);
-    }
-
-    public synchronized void addLocalStat(Stat localStat)
+    public Set<Stat> getGlobalStatsCopy()
     {
-        localStats.add(localStat);
+        Set<Stat> copy;
+        synchronized (globalStats)
+        {
+            copy = new TreeSet<Stat>(globalStats);
+        }
+        return copy;
+    }
+
+    public void addGlobalStat(Stat globalStat)
+    {
+        synchronized (globalStats) {
+            globalStats.add(globalStat);
+        }
+    }
+
+    public Set<Stat> getLocalStats()
+    {
+        return localStats;
+    }
+
+    public Set<Stat> getLocalStatsCopy()
+    {
+        Set<Stat> copy;
+        synchronized (localStats)
+        {
+            copy = new TreeSet<Stat>(localStats);
+        }
+        return copy;
+    }
+
+    public void addLocalStat(Stat localStat)
+    {
+        synchronized (localStats) {
+            localStats.add(localStat);
+        }
+    }
+
+    public int getCoordinatorPort()
+    {
+        return coordinatorPort;
+    }
+
+    public void setCoordinatorPort(int coordinatorPort)
+    {
+        this.coordinatorPort = coordinatorPort;
+    }
+
+    public ArrayList<Node> getNodesList()
+    {
+        return nodesList;
+    }
+
+    public ArrayList<Node> getNextNodes()
+    {
+        return nextNodes;
+    }
+
+    public void addNodeToNodesList(Node node)
+    {
+        synchronized (nodesList)
+        {
+            if (!nodesList.contains(node))
+                nodesList.add(node);
+        }
+    }
+
+    public void addNodeToNextNodes(Node node)
+    {
+        synchronized (nextNodes)
+        {
+            nextNodes.add(node);
+        }
+    }
+
+    public void clearNodesList()
+    {
+        synchronized (nodesList)
+        {
+            nodesList.clear();
+        }
+    }
+
+    public void clearNextNodes()
+    {
+        synchronized (nextNodes)
+        {
+            nextNodes.clear();
+        }
+    }
+
+    public void removeNodeFromNodesList(Node node)
+    {
+        synchronized (nodesList)
+        {
+            nodesList.remove(node);
+        }
+    }
+
+    public void removeNodeFromNextNodes(Node node)
+    {
+        synchronized (nextNodes)
+        {
+            nextNodes.remove(node);
+        }
+    }
+
+    public ArrayList<Node> getNodesListCopy()
+    {
+        ArrayList<Node> copy;
+        synchronized (nodesList)
+        {
+            copy = new ArrayList<Node>(nodesList);
+        }
+        return copy;
+    }
+
+    public ArrayList<Node> getNextNodesCopy()
+    {
+        ArrayList<Node> copy;
+        synchronized (nextNodes)
+        {
+            copy = new ArrayList<Node>(nextNodes);
+        }
+        return copy;
+    }
+
+    public NodeClient getNodeClient() {
+        return nodeClient;
+    }
+
+    public void setNodeClient(NodeClient nodeClient) {
+        this.nodeClient = nodeClient;
+    }
+
+    public Node getNodeFromNodesList(int nodeId)
+    {
+        Node node = null;
+        ArrayList<Node> nodesListCopy = getNodesListCopy();
+        for (Node n : nodesListCopy)
+        {
+            if (n.getId() == nodeId)
+            {
+                node = n;
+                break;
+            }
+        }
+        return node;
+    }
+
+    public void removeNodeFromNodesList(int nodeId)
+    {
+        Node node = getNodeFromNodesList(nodeId);
+
+        synchronized (nodesList)
+        {
+            nodesList.remove(node);
+        }
+    }
+
+    public void removeNodeFromNextNodes(int nodeId)
+    {
+        Node node = getNodeFromNodesList(nodeId);
+
+        synchronized (nextNodes)
+        {
+            nextNodes.remove(node);
+        }
+    }
+
+    public MessagesBuffer getMessagesBuffer() {
+        return messagesBuffer;
+    }
+
+    public NodeServerToSensors getNodeServerToSensors() {
+        return nodeServerToSensors;
+    }
+
+    public void setNodeServerToSensors(NodeServerToSensors nodeServerToSensors) {
+        this.nodeServerToSensors = nodeServerToSensors;
+    }
+
+    public NodeServerToNodes getNodeServerToNodes() {
+        return nodeServerToNodes;
+    }
+
+    public void setNodeServerToNodes(NodeServerToNodes nodeServerToNodes) {
+        this.nodeServerToNodes = nodeServerToNodes;
+    }
+
+    public long computeMidnightMilliseconds(){
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c.getTimeInMillis();
+    }
+
+    public long deltaTime(){
+        return System.currentTimeMillis()-midnight;
     }
 
     public static void main(String[] args)
@@ -162,15 +372,9 @@ public class Node
         int x;
         int y;
         String serverAddress = null;
-        Set<Stat> globalStats = new TreeSet<Stat>();
-        Set<Stat> localStats = new TreeSet<Stat>();
-
         ArrayList<Node> nodeList = null;
         Node thisNode = null;
         State state = State.NOT_COORDINATOR;
-
-        Object timerLock = new Object();
-        long lastTime = System.currentTimeMillis();
 
         ClientConfig config = new DefaultClientConfig();
         config.getClasses().add(JacksonJaxbJsonProvider.class);
@@ -211,7 +415,8 @@ public class Node
         try {
             ipAddress = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            System.out.println("Host sconosciuto");
+//            e.printStackTrace();
         }
 
         Random random = new Random();
@@ -239,14 +444,16 @@ public class Node
                 response = resource.post(ClientResponse.class);
                 if (response.getStatus() == ClientResponse.Status.OK.getStatusCode())
                 {
-                    nodeList = (ArrayList) response.getEntity(new GenericType<List<Node>>() {
-                    });
+                    nodeList = (ArrayList) response.getEntity(new GenericType<List<Node>>() {});
 //                    System.out.println(response.getEntity(String.class));
 
                     for (int i = 0; i<nodeList.size(); i++)
                     {
                         if (nodeList.get(i).getId() == id)
+                        {
                             thisNode = nodeList.get(i);
+                            thisNode.setNodesList(thisNode, nodeList);
+                        }
                     }
 
                     validPosition = true;
@@ -256,7 +463,8 @@ public class Node
             }
             catch (Exception e)
             {
-                e.printStackTrace();
+                System.out.println("Errore nella chiamata di inserimento del nodo al Server Cloud");
+//                e.printStackTrace();
             }
 
             tries++;
@@ -267,10 +475,8 @@ public class Node
 
         if (validPosition)
         {
-            thisNode.nodesList = nodeList;
+//            thisNode.nodesList = nodeList;
             thisNode.setServerAddress(serverAddress);
-
-            System.out.println(thisNode.getNextNodes());
 
             if (nodeList.size() == 1)
             {
@@ -283,8 +489,27 @@ public class Node
             else
             {
                 //Aggiorna la lista dei prossimi nodi nella struttura
-                thisNode.updateNextNodes(thisNode, nodeList);
+                thisNode.updateNextNodes(thisNode);
             }
+
+            System.out.println("NODESLIST: " + thisNode.getNodesListCopy());
+            System.out.println("NEXTNODES: " + thisNode.getNextNodes());
+
+            // In tutti i casi (coordinator o not_coordinator) starta i server per i sensori e per i nodi
+
+            thisNode.setNodeServerToSensors(new NodeServerToSensors(thisNode));
+            thisNode.getNodeServerToSensors().start();
+
+            thisNode.setNodeServerToNodes(new NodeServerToNodes(thisNode));
+            thisNode.getNodeServerToNodes().start();
+
+//            try {
+//                thisNode.sensorsServer.start();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+            System.out.println("Server started for node " + thisNode.getId() + "!");
 
             switch (state)
             {
@@ -303,47 +528,45 @@ public class Node
                 {
                     // Search for the coordinator
                     // Chiede al nodo successivo nell'anello ((i+1)modN) se lui è il coordinatore
-                    Node nextNode = thisNode.getNextNodes().get(0);
+                    Node nextNode = thisNode.getNextNodesCopy().get(0);
 
-                    // Apre un canale con il nodo successivo e gli chiede chi è il coordinatore
-                    thisNode.setCoordinatorPort(thisNode.askForCoordinator(nextNode));
-
-                    // Avverte il nodo/i due nodi precedenti che si è aggiunto nella struttura e che farà parte dei loro prossimi nodi
-                    if (thisNode.getNodesList().size() < 2)
+                    while (thisNode.coordinatorPort == -1)
                     {
-                        // Ci sono solo due nodi nella struttura, quindi il prossimo e il precedente sono lo stesso nodo
-                        Node previousNode = thisNode.getNextNodes().get(0);
-                        thisNode.sendUpdatePreviousNodeMessage(previousNode, thisNode);
-                    }
-                    else
-                    {
-                        System.out.println("CERCANDO I PRECEDENTI NELLA LISTA " + thisNode.getNodesList());
-                        // Ci sono più di due nodi nella struttura, quindi si calcola i due precedenti e li avvisa che è entrato
-                        boolean found[] = {false, false};
-                        int triess = MAX_NODES;
-                        int foundIndex = 0;
-                        ArrayList<Node> nodes = thisNode.getNodesList();
-                        nodes.remove(thisNode);
-                        while (triess > 0)
+                        System.out.println("ASKING FOR COORDINATOR AT NODE " + nextNode);
+                        // Apre un canale con il nodo successivo e gli chiede chi è il coordinatore
+                        try {
+                            thisNode.askForCoordinator(nextNode);
+                        }
+                        catch (Exception e)
                         {
-                            for (Node n : nodes)
+                            System.out.println("Nodo non disponibile!!");
+                            thisNode.removeNodeFromNodesList(nextNode);
+                            thisNode.updateNextNodes(thisNode);
+                            if (thisNode.getNextNodesCopy().size() > 0) {
+                                nextNode = thisNode.getNextNodesCopy().get(0);
+                            }
+                            else
                             {
-                                if (n.getId() == (triess + thisNode.getId()) % (MAX_NODES))
-                                {
-                                    System.out.println("TROVATO PRECEDENTE: " + n);
-                                    found[foundIndex] = true;
-                                    foundIndex++;
-                                    thisNode.sendUpdatePreviousNodeMessage(n, thisNode);
-                                    break;
-                                }
+                                thisNode.setState(State.COORDINATOR);
+                                thisNode.setNodeClient(new NodeClient(thisNode, serverAddress));
+                                thisNode.nodeClient.start();
+                                break;
                             }
 
-                            if (found[0] && found[1])
-                                break;
-
-                            triess--;
                         }
+
+                        System.out.println("ASKEDFORCOORDINATOR");
+
+                        if (thisNode.getState() == State.COORDINATOR)
+                            break;
                     }
+
+                    // Apre un canale con il coordinatore per avvertirlo
+                    // che si è unito alla struttura
+                    thisNode.hiCoordinator("");
+
+//                    // Avverte il nodo/i due nodi precedenti che si è aggiunto nella struttura e che farà parte dei loro prossimi nodi
+//                    thisNode.advicePreviousNodes(thisNode);
 
                     for (int i = 0; i<nodeList.size(); i++)
                     {
@@ -351,7 +574,7 @@ public class Node
                             nodeList.get(i).setState(State.COORDINATOR);
                     }
 
-                    System.out.println(thisNode.getNextNodes());
+                    System.out.println(thisNode.getNextNodesCopy());
 
 //                    // Dopo aver conosciuto il nodo coordinatore, apre il servizio per eventuali richeste su chi sia il coordinatore
 //                    CoordServiceImpl coordService = new CoordServiceImpl(thisNode);
@@ -365,13 +588,18 @@ public class Node
 
                     break;
                 }
-                case WAITING_COORDINATOR: break;
+                case WAITING_COORDINATOR:
+                {
+                    break;
+                }
                 case ELECTING_COORDINATOR: break;
             }
 
             // In tutti i casi (coordinator o not_coordinator)
-            thisNode.setNodeServer(new NodeServer(thisNode));
-            thisNode.nodeServer.start();
+//            thisNode.setNodeServerToNodes(new NodeServerToNodes(thisNode));
+//            thisNode.getNodeServerToNodes().start();
+//            thisNode.setNodeServer(new NodeServer(thisNode));
+//            thisNode.nodeServer.start();
 
             if (wantToExit())
             {
@@ -384,14 +612,31 @@ public class Node
                 {
                     // Vengono chiuse tutte le connessioni e il nodo esce
                     // CHIUDERE LA CONNESSIONE CON GLI ALTRI NODI
-                    thisNode.nodeServer.setStop();
-                    thisNode.nodeServer.getServer().shutdownNow();
-                    if (state == State.COORDINATOR)
+                    synchronized (thisNode.getNodeServerToSensors().getSensorsService().bufferLock)
+                    {
+                        thisNode.getNodeServerToSensors().setStop();
+                        thisNode.getNodeServerToSensors().getSensorsService().insertCounter = 40;
+                        thisNode.getNodeServerToSensors().getSensorsService().bufferLock.notifyAll();
+                    }
+
+                    thisNode.getNodeServerToSensors().getServerToSensors().shutdownNow();
+
+                    synchronized (thisNode.getMessagesBuffer().getBuffer())
+                    {
+                        thisNode.getNodeServerToNodes().setStop();
+                        thisNode.getMessagesBuffer().put(null);
+                        thisNode.getMessagesBuffer().getBuffer().notifyAll();
+                        System.out.println("notifiedAll");
+                    }
+                    thisNode.getNodeServerToNodes().getServerToNodes().shutdownNow();
+
+                    if (thisNode.getState() == State.COORDINATOR)
                     {
                         thisNode.nodeClient.setStop();
                         thisNode.nodeClient.getConn().disconnect();
                         thisNode.nodeClient.getClient().destroy();
                     }
+
 //                    conn.disconnect();
 //                    c.destroy();
 
@@ -411,6 +656,11 @@ public class Node
 
         System.out.println("EXIT");
         return;
+    }
+
+    private void setNodesList(Node thisNode, ArrayList<Node> nodesList)
+    {
+        thisNode.nodesList = nodesList;
     }
 
     public static int readArgInt(String type)
@@ -518,18 +768,21 @@ public class Node
         this.state = state;
     }
 
-    public void updateNextNodes(Node thisNode, ArrayList<Node> nodeList)
+    public void updateNextNodes(Node thisNode)
     {
-        ArrayList<Node> nodes = nodeList;
+        ArrayList<Node> nodes = thisNode.getNodesListCopy();
         nodes.remove(thisNode);
 
-        nextNodes = new ArrayList<Node>();
+        synchronized (nextNodes)
+        {
+            nextNodes = new ArrayList<Node>();
+        }
 
         if (nodes.size() < 2)
         {
             for (int i = 0; i < nodes.size(); i++)
             {
-                nextNodes.add(nodes.get(i));
+                addNodeToNextNodes(nodes.get(i));
             }
         }
         else
@@ -564,7 +817,7 @@ public class Node
                 {
                     if (nodes.get(i).getId() == (thisNode.getId() + tries) % (MAX_NODES))
                     {
-                        nextNodes.add(nodes.get(i));
+                        addNodeToNextNodes(nodes.get(i));
 //                        System.out.println(nextNodes);
                         found[foundIndex] = true;
                         foundIndex++;
@@ -580,12 +833,7 @@ public class Node
         }
     }
 
-    public ArrayList<Node> getNextNodes()
-    {
-        return nextNodes;
-    }
-
-    public int askForCoordinator(Node nextNode)
+    public void askForCoordinator(Node nextNode)
     {
         //plaintext channel on the address (ip/port) which offers the MethodsService service
         final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + nextNode.getNodesPort()).usePlaintext(true).build();
@@ -601,32 +849,23 @@ public class Node
                 setSensorsPort(sensorsPort).
                 setX(x).
                 setY(y).
+                setTimestamp(deltaTime()).
                 build();
 
         //calling the method. it returns an instance of HelloResponse
         CoordServiceOuterClass.CoordResponse response = stub.askForCoordinator(request);
 
-        int coordPort = response.getCoordPort();
+        Message coordResponseMessage = new CoordResponseMessage("coordinatorSent", response.getTimestamp(),
+                response.getNodeId(), response.getCoordPort());
+
+        getMessagesBuffer().put(coordResponseMessage);
+
+//        int coordPort = response.getCoordPort();
 
         //closing the channel
         channel.shutdown();
 
-        return coordPort;
-    }
-
-    public int getCoordinatorPort()
-    {
-        return coordinatorPort;
-    }
-
-    public void setCoordinatorPort(int coordinatorPort)
-    {
-        this.coordinatorPort = coordinatorPort;
-    }
-
-    public ArrayList<Node> getNodesList()
-    {
-        return nodesList;
+//        return coordPort;
     }
 
     public void sendElectionMessage(Node nextNode, String requestStatus, int requestValue)
@@ -639,16 +878,24 @@ public class Node
 
         //creating the HelloResponse object which will be provided as input to the RPC method
         ElectionServiceOuterClass.ElectionRequest request = ElectionServiceOuterClass.ElectionRequest.newBuilder().
-                setStatus(requestStatus).setValue(requestValue).build();
+                setStatus(requestStatus).
+                setValue(requestValue).
+                setTimestamp(deltaTime()).
+                build();
 
         //calling the method. it returns an instance of HelloResponse
         ElectionServiceOuterClass.ElectionResponse response = stub.sendElectionMessage(request);
+
+        Message electionResponseMessage = new ElectionResponseMessage("electionMessageReceived", response.getTimestamp(),
+                response.getNodeId(), response.getAck());
+
+        getMessagesBuffer().put(electionResponseMessage);
 
         //closing the channel
         channel.shutdown();
     }
 
-    public void sendUpdatePreviousNodeMessage(Node nodeToAdvise, Node node)
+    public void sendUpdatePreviousNodeMessage(Node nodeToAdvise, Node node, String type)
     {
         //plaintext channel on the address (ip/port) which offers the MethodsService service
         final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + nodeToAdvise.getNodesPort()).usePlaintext(true).build();
@@ -664,28 +911,238 @@ public class Node
                 setSensorsPort(node.getSensorsPort()).
                 setX(node.getX()).
                 setY(node.getY()).
+                setType(type).
+                setTimestamp(deltaTime()).
                 build();
 
         //calling the method. it returns an instance of HelloResponse
         CoordServiceOuterClass.NodeResponse response = stub.adviceNode(request);
 
+        Message nodeResponseMessage = new NodeResponseMessage("nodeAdviced", response.getTimestamp(),
+                response.getNodeId(), response.getAck());
+
+        getMessagesBuffer().put(nodeResponseMessage);
+
         //closing the channel
         channel.shutdown();
     }
 
-    public NodeServer getNodeServer() {
-        return nodeServer;
+//    public NodeServer getNodeServer() {
+//        return nodeServer;
+//    }
+
+//    public void setNodeServer(NodeServer nodeServer) {
+//        this.nodeServer = nodeServer;
+//    }
+
+//    public Server getSensorsServer()
+//    {
+//        return sensorsServer;
+//    }
+
+//    public void setSensorsServer(Server sensorsServer)
+//    {
+//        this.sensorsServer = sensorsServer;
+//    }
+
+//    public SensorServiceImpl getSensorsService()
+//    {
+//        return sensorsService;
+//    }
+
+//    public void setSensorsService(SensorServiceImpl sensorsService)
+//    {
+//        this.sensorsService = sensorsService;
+//    }
+
+//    public void advicePreviousNodes(Node thisNode, Node changedNode, String type)
+//    {
+//        ArrayList<Node> nodes = thisNode.getNodesListCopy();
+//        nodes.remove(changedNode);
+////        nodes.remove(thisNode);
+//
+//        // Se bisogna avvisare che un nodo che un suo nodo successivo è stato rimosso, bisogna prima avvertirlo
+//        // di quale sarà il terzo nodo successivo
+//
+//        System.out.println("NODES: " + nodes);
+//
+//        if (nodes.size() < 3)
+//        {
+//            // Ci sono solo due nodi nella struttura, quindi il prossimo e il precedente sono lo stesso nodo
+//            Node previousNode = nodes.get(0);
+//            if (previousNode.getId() == thisNode.getId())
+//                previousNode = nodes.get(1);
+//            System.out.println("PREVIOUS NODE: " + previousNode);
+//
+//            thisNode.sendUpdatePreviousNodeMessage(previousNode, changedNode, type);
+//        }
+//        else
+//        {
+//            System.out.println("CERCANDO I PRECEDENTI NELLA LISTA " + thisNode.getNodesListCopy());
+//            // Ci sono più di due nodi nella struttura, quindi si calcola i due precedenti e li avvisa che è entrato
+//            boolean found[] = {false, false};
+//            int triess = MAX_NODES;
+//            int foundIndex = 0;
+//            while (triess > 0)
+//            {
+//                for (Node n : nodes)
+//                {
+//                    if (n.getId() == (triess + changedNode.getId()) % (MAX_NODES))
+//                    {
+//                        System.out.println("TROVATO PRECEDENTE: " + n);
+//                        Node previousNode = n;
+//                        found[foundIndex] = true;
+//                        foundIndex++;
+//
+//                        if (n.getId() == thisNode.getId())
+//                            break;
+//
+//                        if (type.equals("RIMOSSO"))
+//                        {
+//                            int triez = 0;
+//                            boolean foundz = false;
+//                            while (triez < MAX_NODES - 3)
+//                            {
+//                                for (Node m : nodes)
+//                                {
+//                                    if (m.getId() == previousNode.getId() + 3 + triez)
+//                                    {
+//                                        if (m.getId() == thisNode.getId())
+//                                            break;
+//
+//                                        Node nextNode = m;
+//
+//                                        System.out.println("NODO " + nextNode + " ASSENTE NELLA LISTA DI " + previousNode + ". AGGIUNTO.");
+//
+//                                        thisNode.sendUpdatePreviousNodeMessage(previousNode, nextNode, "AGGIUNTO");
+//
+//                                        foundz = true;
+//                                    }
+//                                }
+//
+//                                if (foundz)
+//                                    break;
+//
+//                                triez++;
+//                            }
+//                        }
+//
+//                        thisNode.sendUpdatePreviousNodeMessage(previousNode, changedNode, type);
+//
+//                        break;
+//                    }
+//                }
+//
+//                if (found[0] && found[1])
+//                    break;
+//
+//                triess--;
+//            }
+//        }
+//
+//
+//
+////        if (changedNode.getNodesList().size() < 2)
+////        {
+////            // Ci sono solo due nodi nella struttura, quindi il prossimo e il precedente sono lo stesso nodo
+////            Node previousNode = changedNode.getNextNodes().get(0);
+////            changedNode.sendUpdatePreviousNodeMessage(previousNode, changedNode, type);
+////        }
+////        else
+////        {
+////            System.out.println("CERCANDO I PRECEDENTI NELLA LISTA " + changedNode.getNodesList());
+////            // Ci sono più di due nodi nella struttura, quindi si calcola i due precedenti e li avvisa che è entrato
+////            boolean found[] = {false, false};
+////            int triess = MAX_NODES;
+////            int foundIndex = 0;
+////            ArrayList<Node> nodes = changedNode.getNodesList();
+////            nodes.remove(changedNode);
+////            while (triess > 0)
+////            {
+////                for (Node n : nodes)
+////                {
+////                    if (n.getId() == (triess + changedNode.getId()) % (MAX_NODES))
+////                    {
+////                        System.out.println("TROVATO PRECEDENTE: " + n);
+////                        found[foundIndex] = true;
+////                        foundIndex++;
+////                        changedNode.sendUpdatePreviousNodeMessage(n, changedNode, type);
+////                        break;
+////                    }
+////                }
+////
+////                if (found[0] && found[1])
+////                    break;
+////
+////                triess--;
+////            }
+////        }
+//    }
+
+    public void adviceNodes(Node thisNode, Node changedNode, String type)
+    {
+        ArrayList<Node> nodes = thisNode.getNodesListCopy();
+        nodes.remove(changedNode);
+        nodes.remove(thisNode);
+
+        System.out.println("NODES: " + nodes);
+
+        // Avvisa tutti gli altri nodi che un nodo si è aggiunto/rimosso dalla rete
+
+        for (Node n : nodes)
+        {
+            n.sendUpdatePreviousNodeMessage(n, changedNode, type);
+        }
+
     }
 
-    public void setNodeServer(NodeServer nodeServer) {
-        this.nodeServer = nodeServer;
+    public void hiCoordinator(String type)
+    {
+        //plaintext channel on the address (ip/port) which offers the MethodsService service
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + getCoordinatorPort()).usePlaintext(true).build();
+
+        //creating a blocking stub on the channel
+        CoordServiceGrpc.CoordServiceBlockingStub stub = CoordServiceGrpc.newBlockingStub(channel);
+
+        CoordServiceOuterClass.NodeRequest request;
+
+        if (type.equals("NEW_COORDINATOR"))
+        {
+            request = CoordServiceOuterClass.NodeRequest.newBuilder().
+                    setNodeId(id).
+                    setIpAddress(ipAddress).
+                    setNodesPort(nodesPort).
+                    setSensorsPort(sensorsPort).
+                    setX(x).
+                    setY(y).
+                    setTimestamp(deltaTime()).
+                    setType(type).
+                    build();
+        }
+
+        else
+        {
+            request = CoordServiceOuterClass.NodeRequest.newBuilder().
+                    setNodeId(id).
+                    setIpAddress(ipAddress).
+                    setNodesPort(nodesPort).
+                    setSensorsPort(sensorsPort).
+                    setX(x).
+                    setY(y).
+                    setTimestamp(deltaTime()).
+                    build();
+        }
+
+        //calling the method. it returns an instance of HelloResponse
+        CoordServiceOuterClass.NodeResponse response = stub.hiCoordinator(request);
+
+        Message nodeResponseMessage = new NodeResponseMessage("hiNode", response.getTimestamp(),
+                response.getNodeId(), response.getAck());
+
+        getMessagesBuffer().put(nodeResponseMessage);
+
+        //closing the channel
+        channel.shutdown();
     }
 
-    public NodeClient getNodeClient() {
-        return nodeClient;
-    }
-
-    public void setNodeClient(NodeClient nodeClient) {
-        this.nodeClient = nodeClient;
-    }
 }

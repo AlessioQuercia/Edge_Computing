@@ -52,6 +52,21 @@ public final class CoordServiceOuterClass {
      * <code>int32 y = 6;</code>
      */
     int getY();
+
+    /**
+     * <code>string type = 7;</code>
+     */
+    java.lang.String getType();
+    /**
+     * <code>string type = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getTypeBytes();
+
+    /**
+     * <code>int64 timestamp = 8;</code>
+     */
+    long getTimestamp();
   }
   /**
    * Protobuf type {@code beans.NodeRequest}
@@ -72,6 +87,8 @@ public final class CoordServiceOuterClass {
       nodesPort_ = 0;
       x_ = 0;
       y_ = 0;
+      type_ = "";
+      timestamp_ = 0L;
     }
 
     @java.lang.Override
@@ -134,6 +151,17 @@ public final class CoordServiceOuterClass {
             case 48: {
 
               y_ = input.readInt32();
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              type_ = s;
+              break;
+            }
+            case 64: {
+
+              timestamp_ = input.readInt64();
               break;
             }
           }
@@ -239,6 +267,49 @@ public final class CoordServiceOuterClass {
       return y_;
     }
 
+    public static final int TYPE_FIELD_NUMBER = 7;
+    private volatile java.lang.Object type_;
+    /**
+     * <code>string type = 7;</code>
+     */
+    public java.lang.String getType() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        type_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string type = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTypeBytes() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        type_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TIMESTAMP_FIELD_NUMBER = 8;
+    private long timestamp_;
+    /**
+     * <code>int64 timestamp = 8;</code>
+     */
+    public long getTimestamp() {
+      return timestamp_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -268,6 +339,12 @@ public final class CoordServiceOuterClass {
       }
       if (y_ != 0) {
         output.writeInt32(6, y_);
+      }
+      if (!getTypeBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, type_);
+      }
+      if (timestamp_ != 0L) {
+        output.writeInt64(8, timestamp_);
       }
       unknownFields.writeTo(output);
     }
@@ -300,6 +377,13 @@ public final class CoordServiceOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, y_);
       }
+      if (!getTypeBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, type_);
+      }
+      if (timestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(8, timestamp_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -328,6 +412,10 @@ public final class CoordServiceOuterClass {
           == other.getX());
       result = result && (getY()
           == other.getY());
+      result = result && getType()
+          .equals(other.getType());
+      result = result && (getTimestamp()
+          == other.getTimestamp());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -351,6 +439,11 @@ public final class CoordServiceOuterClass {
       hash = (53 * hash) + getX();
       hash = (37 * hash) + Y_FIELD_NUMBER;
       hash = (53 * hash) + getY();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getType().hashCode();
+      hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimestamp());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -492,6 +585,10 @@ public final class CoordServiceOuterClass {
 
         y_ = 0;
 
+        type_ = "";
+
+        timestamp_ = 0L;
+
         return this;
       }
 
@@ -520,6 +617,8 @@ public final class CoordServiceOuterClass {
         result.nodesPort_ = nodesPort_;
         result.x_ = x_;
         result.y_ = y_;
+        result.type_ = type_;
+        result.timestamp_ = timestamp_;
         onBuilt();
         return result;
       }
@@ -579,6 +678,13 @@ public final class CoordServiceOuterClass {
         }
         if (other.getY() != 0) {
           setY(other.getY());
+        }
+        if (!other.getType().isEmpty()) {
+          type_ = other.type_;
+          onChanged();
+        }
+        if (other.getTimestamp() != 0L) {
+          setTimestamp(other.getTimestamp());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -805,6 +911,101 @@ public final class CoordServiceOuterClass {
         onChanged();
         return this;
       }
+
+      private java.lang.Object type_ = "";
+      /**
+       * <code>string type = 7;</code>
+       */
+      public java.lang.String getType() {
+        java.lang.Object ref = type_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          type_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string type = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTypeBytes() {
+        java.lang.Object ref = type_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          type_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string type = 7;</code>
+       */
+      public Builder setType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string type = 7;</code>
+       */
+      public Builder clearType() {
+        
+        type_ = getDefaultInstance().getType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string type = 7;</code>
+       */
+      public Builder setTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        type_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long timestamp_ ;
+      /**
+       * <code>int64 timestamp = 8;</code>
+       */
+      public long getTimestamp() {
+        return timestamp_;
+      }
+      /**
+       * <code>int64 timestamp = 8;</code>
+       */
+      public Builder setTimestamp(long value) {
+        
+        timestamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 timestamp = 8;</code>
+       */
+      public Builder clearTimestamp() {
+        
+        timestamp_ = 0L;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFieldsProto3(unknownFields);
@@ -859,9 +1060,19 @@ public final class CoordServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>int32 coordPort = 1;</code>
+     * <code>int32 nodeId = 1;</code>
+     */
+    int getNodeId();
+
+    /**
+     * <code>int32 coordPort = 2;</code>
      */
     int getCoordPort();
+
+    /**
+     * <code>int64 timestamp = 3;</code>
+     */
+    long getTimestamp();
   }
   /**
    * Protobuf type {@code beans.CoordResponse}
@@ -876,7 +1087,9 @@ public final class CoordServiceOuterClass {
       super(builder);
     }
     private CoordResponse() {
+      nodeId_ = 0;
       coordPort_ = 0;
+      timestamp_ = 0L;
     }
 
     @java.lang.Override
@@ -912,7 +1125,17 @@ public final class CoordServiceOuterClass {
             }
             case 8: {
 
+              nodeId_ = input.readInt32();
+              break;
+            }
+            case 16: {
+
               coordPort_ = input.readInt32();
+              break;
+            }
+            case 24: {
+
+              timestamp_ = input.readInt64();
               break;
             }
           }
@@ -939,13 +1162,31 @@ public final class CoordServiceOuterClass {
               beans.CoordServiceOuterClass.CoordResponse.class, beans.CoordServiceOuterClass.CoordResponse.Builder.class);
     }
 
-    public static final int COORDPORT_FIELD_NUMBER = 1;
+    public static final int NODEID_FIELD_NUMBER = 1;
+    private int nodeId_;
+    /**
+     * <code>int32 nodeId = 1;</code>
+     */
+    public int getNodeId() {
+      return nodeId_;
+    }
+
+    public static final int COORDPORT_FIELD_NUMBER = 2;
     private int coordPort_;
     /**
-     * <code>int32 coordPort = 1;</code>
+     * <code>int32 coordPort = 2;</code>
      */
     public int getCoordPort() {
       return coordPort_;
+    }
+
+    public static final int TIMESTAMP_FIELD_NUMBER = 3;
+    private long timestamp_;
+    /**
+     * <code>int64 timestamp = 3;</code>
+     */
+    public long getTimestamp() {
+      return timestamp_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -960,8 +1201,14 @@ public final class CoordServiceOuterClass {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (nodeId_ != 0) {
+        output.writeInt32(1, nodeId_);
+      }
       if (coordPort_ != 0) {
-        output.writeInt32(1, coordPort_);
+        output.writeInt32(2, coordPort_);
+      }
+      if (timestamp_ != 0L) {
+        output.writeInt64(3, timestamp_);
       }
       unknownFields.writeTo(output);
     }
@@ -971,9 +1218,17 @@ public final class CoordServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (nodeId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, nodeId_);
+      }
       if (coordPort_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, coordPort_);
+          .computeInt32Size(2, coordPort_);
+      }
+      if (timestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, timestamp_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -991,8 +1246,12 @@ public final class CoordServiceOuterClass {
       beans.CoordServiceOuterClass.CoordResponse other = (beans.CoordServiceOuterClass.CoordResponse) obj;
 
       boolean result = true;
+      result = result && (getNodeId()
+          == other.getNodeId());
       result = result && (getCoordPort()
           == other.getCoordPort());
+      result = result && (getTimestamp()
+          == other.getTimestamp());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -1004,8 +1263,13 @@ public final class CoordServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NODEID_FIELD_NUMBER;
+      hash = (53 * hash) + getNodeId();
       hash = (37 * hash) + COORDPORT_FIELD_NUMBER;
       hash = (53 * hash) + getCoordPort();
+      hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimestamp());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1135,7 +1399,11 @@ public final class CoordServiceOuterClass {
       }
       public Builder clear() {
         super.clear();
+        nodeId_ = 0;
+
         coordPort_ = 0;
+
+        timestamp_ = 0L;
 
         return this;
       }
@@ -1159,7 +1427,9 @@ public final class CoordServiceOuterClass {
 
       public beans.CoordServiceOuterClass.CoordResponse buildPartial() {
         beans.CoordServiceOuterClass.CoordResponse result = new beans.CoordServiceOuterClass.CoordResponse(this);
+        result.nodeId_ = nodeId_;
         result.coordPort_ = coordPort_;
+        result.timestamp_ = timestamp_;
         onBuilt();
         return result;
       }
@@ -1201,8 +1471,14 @@ public final class CoordServiceOuterClass {
 
       public Builder mergeFrom(beans.CoordServiceOuterClass.CoordResponse other) {
         if (other == beans.CoordServiceOuterClass.CoordResponse.getDefaultInstance()) return this;
+        if (other.getNodeId() != 0) {
+          setNodeId(other.getNodeId());
+        }
         if (other.getCoordPort() != 0) {
           setCoordPort(other.getCoordPort());
+        }
+        if (other.getTimestamp() != 0L) {
+          setTimestamp(other.getTimestamp());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1231,15 +1507,41 @@ public final class CoordServiceOuterClass {
         return this;
       }
 
+      private int nodeId_ ;
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public int getNodeId() {
+        return nodeId_;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder setNodeId(int value) {
+        
+        nodeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder clearNodeId() {
+        
+        nodeId_ = 0;
+        onChanged();
+        return this;
+      }
+
       private int coordPort_ ;
       /**
-       * <code>int32 coordPort = 1;</code>
+       * <code>int32 coordPort = 2;</code>
        */
       public int getCoordPort() {
         return coordPort_;
       }
       /**
-       * <code>int32 coordPort = 1;</code>
+       * <code>int32 coordPort = 2;</code>
        */
       public Builder setCoordPort(int value) {
         
@@ -1248,11 +1550,37 @@ public final class CoordServiceOuterClass {
         return this;
       }
       /**
-       * <code>int32 coordPort = 1;</code>
+       * <code>int32 coordPort = 2;</code>
        */
       public Builder clearCoordPort() {
         
         coordPort_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long timestamp_ ;
+      /**
+       * <code>int64 timestamp = 3;</code>
+       */
+      public long getTimestamp() {
+        return timestamp_;
+      }
+      /**
+       * <code>int64 timestamp = 3;</code>
+       */
+      public Builder setTimestamp(long value) {
+        
+        timestamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 timestamp = 3;</code>
+       */
+      public Builder clearTimestamp() {
+        
+        timestamp_ = 0L;
         onChanged();
         return this;
       }
@@ -1310,14 +1638,24 @@ public final class CoordServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string ack = 1;</code>
+     * <code>int32 nodeId = 1;</code>
+     */
+    int getNodeId();
+
+    /**
+     * <code>string ack = 2;</code>
      */
     java.lang.String getAck();
     /**
-     * <code>string ack = 1;</code>
+     * <code>string ack = 2;</code>
      */
     com.google.protobuf.ByteString
         getAckBytes();
+
+    /**
+     * <code>int64 timestamp = 3;</code>
+     */
+    long getTimestamp();
   }
   /**
    * Protobuf type {@code beans.NodeResponse}
@@ -1332,7 +1670,9 @@ public final class CoordServiceOuterClass {
       super(builder);
     }
     private NodeResponse() {
+      nodeId_ = 0;
       ack_ = "";
+      timestamp_ = 0L;
     }
 
     @java.lang.Override
@@ -1366,10 +1706,20 @@ public final class CoordServiceOuterClass {
               }
               break;
             }
-            case 10: {
+            case 8: {
+
+              nodeId_ = input.readInt32();
+              break;
+            }
+            case 18: {
               java.lang.String s = input.readStringRequireUtf8();
 
               ack_ = s;
+              break;
+            }
+            case 24: {
+
+              timestamp_ = input.readInt64();
               break;
             }
           }
@@ -1396,10 +1746,19 @@ public final class CoordServiceOuterClass {
               beans.CoordServiceOuterClass.NodeResponse.class, beans.CoordServiceOuterClass.NodeResponse.Builder.class);
     }
 
-    public static final int ACK_FIELD_NUMBER = 1;
+    public static final int NODEID_FIELD_NUMBER = 1;
+    private int nodeId_;
+    /**
+     * <code>int32 nodeId = 1;</code>
+     */
+    public int getNodeId() {
+      return nodeId_;
+    }
+
+    public static final int ACK_FIELD_NUMBER = 2;
     private volatile java.lang.Object ack_;
     /**
-     * <code>string ack = 1;</code>
+     * <code>string ack = 2;</code>
      */
     public java.lang.String getAck() {
       java.lang.Object ref = ack_;
@@ -1414,7 +1773,7 @@ public final class CoordServiceOuterClass {
       }
     }
     /**
-     * <code>string ack = 1;</code>
+     * <code>string ack = 2;</code>
      */
     public com.google.protobuf.ByteString
         getAckBytes() {
@@ -1430,6 +1789,15 @@ public final class CoordServiceOuterClass {
       }
     }
 
+    public static final int TIMESTAMP_FIELD_NUMBER = 3;
+    private long timestamp_;
+    /**
+     * <code>int64 timestamp = 3;</code>
+     */
+    public long getTimestamp() {
+      return timestamp_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -1442,8 +1810,14 @@ public final class CoordServiceOuterClass {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (nodeId_ != 0) {
+        output.writeInt32(1, nodeId_);
+      }
       if (!getAckBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, ack_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, ack_);
+      }
+      if (timestamp_ != 0L) {
+        output.writeInt64(3, timestamp_);
       }
       unknownFields.writeTo(output);
     }
@@ -1453,8 +1827,16 @@ public final class CoordServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (nodeId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, nodeId_);
+      }
       if (!getAckBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, ack_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, ack_);
+      }
+      if (timestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, timestamp_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1472,8 +1854,12 @@ public final class CoordServiceOuterClass {
       beans.CoordServiceOuterClass.NodeResponse other = (beans.CoordServiceOuterClass.NodeResponse) obj;
 
       boolean result = true;
+      result = result && (getNodeId()
+          == other.getNodeId());
       result = result && getAck()
           .equals(other.getAck());
+      result = result && (getTimestamp()
+          == other.getTimestamp());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -1485,8 +1871,13 @@ public final class CoordServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NODEID_FIELD_NUMBER;
+      hash = (53 * hash) + getNodeId();
       hash = (37 * hash) + ACK_FIELD_NUMBER;
       hash = (53 * hash) + getAck().hashCode();
+      hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimestamp());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1616,7 +2007,11 @@ public final class CoordServiceOuterClass {
       }
       public Builder clear() {
         super.clear();
+        nodeId_ = 0;
+
         ack_ = "";
+
+        timestamp_ = 0L;
 
         return this;
       }
@@ -1640,7 +2035,9 @@ public final class CoordServiceOuterClass {
 
       public beans.CoordServiceOuterClass.NodeResponse buildPartial() {
         beans.CoordServiceOuterClass.NodeResponse result = new beans.CoordServiceOuterClass.NodeResponse(this);
+        result.nodeId_ = nodeId_;
         result.ack_ = ack_;
+        result.timestamp_ = timestamp_;
         onBuilt();
         return result;
       }
@@ -1682,9 +2079,15 @@ public final class CoordServiceOuterClass {
 
       public Builder mergeFrom(beans.CoordServiceOuterClass.NodeResponse other) {
         if (other == beans.CoordServiceOuterClass.NodeResponse.getDefaultInstance()) return this;
+        if (other.getNodeId() != 0) {
+          setNodeId(other.getNodeId());
+        }
         if (!other.getAck().isEmpty()) {
           ack_ = other.ack_;
           onChanged();
+        }
+        if (other.getTimestamp() != 0L) {
+          setTimestamp(other.getTimestamp());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1713,9 +2116,35 @@ public final class CoordServiceOuterClass {
         return this;
       }
 
+      private int nodeId_ ;
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public int getNodeId() {
+        return nodeId_;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder setNodeId(int value) {
+        
+        nodeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder clearNodeId() {
+        
+        nodeId_ = 0;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object ack_ = "";
       /**
-       * <code>string ack = 1;</code>
+       * <code>string ack = 2;</code>
        */
       public java.lang.String getAck() {
         java.lang.Object ref = ack_;
@@ -1730,7 +2159,7 @@ public final class CoordServiceOuterClass {
         }
       }
       /**
-       * <code>string ack = 1;</code>
+       * <code>string ack = 2;</code>
        */
       public com.google.protobuf.ByteString
           getAckBytes() {
@@ -1746,7 +2175,7 @@ public final class CoordServiceOuterClass {
         }
       }
       /**
-       * <code>string ack = 1;</code>
+       * <code>string ack = 2;</code>
        */
       public Builder setAck(
           java.lang.String value) {
@@ -1759,7 +2188,7 @@ public final class CoordServiceOuterClass {
         return this;
       }
       /**
-       * <code>string ack = 1;</code>
+       * <code>string ack = 2;</code>
        */
       public Builder clearAck() {
         
@@ -1768,7 +2197,7 @@ public final class CoordServiceOuterClass {
         return this;
       }
       /**
-       * <code>string ack = 1;</code>
+       * <code>string ack = 2;</code>
        */
       public Builder setAckBytes(
           com.google.protobuf.ByteString value) {
@@ -1778,6 +2207,32 @@ public final class CoordServiceOuterClass {
   checkByteStringIsUtf8(value);
         
         ack_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long timestamp_ ;
+      /**
+       * <code>int64 timestamp = 3;</code>
+       */
+      public long getTimestamp() {
+        return timestamp_;
+      }
+      /**
+       * <code>int64 timestamp = 3;</code>
+       */
+      public Builder setTimestamp(long value) {
+        
+        timestamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 timestamp = 3;</code>
+       */
+      public Builder clearTimestamp() {
+        
+        timestamp_ = 0L;
         onChanged();
         return this;
       }
@@ -1854,15 +2309,19 @@ public final class CoordServiceOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022CoordService.proto\022\005beans\"n\n\013NodeReque" +
-      "st\022\016\n\006nodeId\030\001 \001(\005\022\021\n\tipAddress\030\002 \001(\t\022\023\n" +
-      "\013sensorsPort\030\003 \001(\005\022\021\n\tnodesPort\030\004 \001(\005\022\t\n" +
-      "\001x\030\005 \001(\005\022\t\n\001y\030\006 \001(\005\"\"\n\rCoordResponse\022\021\n\t" +
-      "coordPort\030\001 \001(\005\"\033\n\014NodeResponse\022\013\n\003ack\030\001" +
-      " \001(\t2\204\001\n\014CoordService\022=\n\021askForCoordinat" +
-      "or\022\022.beans.NodeRequest\032\024.beans.CoordResp" +
-      "onse\0225\n\nadviceNode\022\022.beans.NodeRequest\032\023" +
-      ".beans.NodeResponseb\006proto3"
+      "\n\022CoordService.proto\022\005beans\"\217\001\n\013NodeRequ" +
+      "est\022\016\n\006nodeId\030\001 \001(\005\022\021\n\tipAddress\030\002 \001(\t\022\023" +
+      "\n\013sensorsPort\030\003 \001(\005\022\021\n\tnodesPort\030\004 \001(\005\022\t" +
+      "\n\001x\030\005 \001(\005\022\t\n\001y\030\006 \001(\005\022\014\n\004type\030\007 \001(\t\022\021\n\tti" +
+      "mestamp\030\010 \001(\003\"E\n\rCoordResponse\022\016\n\006nodeId" +
+      "\030\001 \001(\005\022\021\n\tcoordPort\030\002 \001(\005\022\021\n\ttimestamp\030\003" +
+      " \001(\003\">\n\014NodeResponse\022\016\n\006nodeId\030\001 \001(\005\022\013\n\003" +
+      "ack\030\002 \001(\t\022\021\n\ttimestamp\030\003 \001(\0032\276\001\n\014CoordSe" +
+      "rvice\022=\n\021askForCoordinator\022\022.beans.NodeR" +
+      "equest\032\024.beans.CoordResponse\0225\n\nadviceNo" +
+      "de\022\022.beans.NodeRequest\032\023.beans.NodeRespo" +
+      "nse\0228\n\rhiCoordinator\022\022.beans.NodeRequest" +
+      "\032\023.beans.NodeResponseb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1881,19 +2340,19 @@ public final class CoordServiceOuterClass {
     internal_static_beans_NodeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_beans_NodeRequest_descriptor,
-        new java.lang.String[] { "NodeId", "IpAddress", "SensorsPort", "NodesPort", "X", "Y", });
+        new java.lang.String[] { "NodeId", "IpAddress", "SensorsPort", "NodesPort", "X", "Y", "Type", "Timestamp", });
     internal_static_beans_CoordResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_beans_CoordResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_beans_CoordResponse_descriptor,
-        new java.lang.String[] { "CoordPort", });
+        new java.lang.String[] { "NodeId", "CoordPort", "Timestamp", });
     internal_static_beans_NodeResponse_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_beans_NodeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_beans_NodeResponse_descriptor,
-        new java.lang.String[] { "Ack", });
+        new java.lang.String[] { "NodeId", "Ack", "Timestamp", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

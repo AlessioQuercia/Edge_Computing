@@ -1,6 +1,7 @@
 package beans;
 
 import javax.xml.bind.annotation.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /* City representing the city */
@@ -19,11 +20,7 @@ public class City
     Set<Stat> globalStats;
 
     @XmlElement(name = "localStats")
-    Set<Stat> localStats;
-
-    private Object globalStatsLock = new Object();
-
-    private Object localStatsLock = new Object();
+    Map<Integer, TreeSet<Stat>> localStats;
 
     private static City instance;
 
@@ -32,7 +29,7 @@ public class City
         nodesGrid = new Node[100][100];
         nodesList = new ArrayList<Node>();
         globalStats = new TreeSet<Stat>();
-        localStats = new TreeSet<Stat>();
+        localStats = new HashMap<Integer, TreeSet<Stat>>();
     }
 
     public static synchronized City getInstance()
@@ -44,21 +41,36 @@ public class City
         return instance;
     }
 
-    public synchronized Node[][] getNodesGrid()
+    public Node[][] getNodesGrid()
     {
         Node[][] copy = new Node[100][100];
-        System.arraycopy(nodesGrid, 0, copy, 0, nodesGrid.length);
+
+        synchronized (nodesGrid)
+        {
+            System.arraycopy(nodesGrid, 0, copy, 0, nodesGrid.length);
+        }
+
         return copy;
     }
 
-    public synchronized List<Node> getNodesList()
+    public List<Node> getNodesList()
     {
-        return new ArrayList<Node>(nodesList);
+        ArrayList<Node> copy = null;
+
+        synchronized (nodesList)
+        {
+            copy = new ArrayList<>(nodesList);
+        }
+
+        return copy;
     }
 
     public void setNodesGrid(Node[][] nodesGrid)
     {
-        this.nodesGrid = nodesGrid;
+        synchronized (nodesGrid)
+        {
+            this.nodesGrid = nodesGrid;
+        }
     }
 
     public synchronized List<Node> add(Node node)
@@ -67,20 +79,20 @@ public class City
 //            if (isAddable(node)) {
         nodesGrid[node.getY()][node.getX()] = node;
         nodesList.add(node);
-        return (List<Node>) nodesList;
-//        }
-//        }
-//        return null;
+
+        localStats.put(node.getId(), new TreeSet<Stat>());
+
+        return nodesList;
+
     }
 
     public synchronized void remove(Node node)
     {
-        if (nodesGrid[node.getY()][node.getX()] == node)
-            nodesGrid[node.getY()][node.getX()] = null;
+        nodesGrid[node.getY()][node.getX()] = null;
         nodesList.remove(node);
     }
 
-    public boolean isAddable(Node node)
+    public synchronized boolean isAddable(Node node)
     {
         //Check if the given position is valid
         if (node.getX() < 0 || node.getX() >= 100 || node.getY() < 0 || node.getY() >= 100 || nodesGrid[node.getY()][node.getX()] != null)
@@ -106,7 +118,7 @@ public class City
         return true;
     }
 
-    public boolean isAddable(int ID, int x, int y)
+    public synchronized boolean isAddable(int ID, int x, int y)
     {
         //Check if the given position is valid
         if (x < 0 || x >= 100 || y < 0 || y >= 100 || nodesGrid[y][x] != null)
@@ -144,7 +156,7 @@ public class City
 
     public void addGlobalStat(Stat stat)
     {
-        synchronized (globalStatsLock)
+        synchronized (globalStats)
         {
             globalStats.add(stat);
         }
@@ -156,13 +168,15 @@ public class City
         {
             Stat[] statsArray = (Stat[]) stats.toArray(new Stat[stats.size()]);
             for (int i = 0; i < statsArray.length; i++)
-                localStats.add(statsArray[i]);
+            {
+                localStats.get(statsArray[i].getNodeId()).add(statsArray[i]);
+            }
         }
     }
 
     public Node getNearestNode(int x, int y)
     {
-        ArrayList<Node> nodesListCopy = new ArrayList<Node>(nodesList);
+        ArrayList<Node> nodesListCopy = (ArrayList<Node>)getNodesList();
         Node nearestNode = null;
         int dist = Integer.MAX_VALUE;
         for (Node n : nodesListCopy)
@@ -181,19 +195,22 @@ public class City
     public String toString()
     {
         String result = "";
-        for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < 100; j++) {
-                if (nodesGrid[i][j] != null) {
-                    System.out.print("1 ");
-                    result += "1 ";
+
+        synchronized (nodesGrid)
+        {
+            for (int i = 0; i < 100; i++) {
+                for (int j = 0; j < 100; j++) {
+                    if (nodesGrid[i][j] != null) {
+                        System.out.print("1 ");
+                        result += "1 ";
+                    } else {
+                        System.out.print("0 ");
+                        result += "0 ";
+                    }
                 }
-                else {
-                    System.out.print("0 ");
-                    result += "0 ";
-                }
+                System.out.println();
+                result += "\n";
             }
-            System.out.println();
-            result += "\n";
         }
         return result;
     }
@@ -208,7 +225,12 @@ public class City
 //        System.out.println(localStats);
 //        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
-        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
+        Stat[] stats;
+
+        synchronized (localStats.get(id))
+        {
+            stats = (Stat[]) localStats.get(id).toArray(new Stat[localStats.size()]);
+        }
 
         int numStats = Math.min(n, stats.length);
 
@@ -223,7 +245,11 @@ public class City
     {
         Set<Stat> nodesLastStats = new TreeSet<Stat>();
 
-        Set<Stat> globalStatsCopy = new TreeSet<Stat>(globalStats);
+        Set<Stat> globalStatsCopy;
+
+        synchronized (globalStats) {
+            globalStatsCopy = new TreeSet<Stat>(globalStats);
+        }
 
         Stat[] stats = (Stat[])globalStatsCopy.toArray(new Stat[globalStatsCopy.size()]);
 
@@ -239,9 +265,30 @@ public class City
     {
         Set<Stat> nodesLastStats = new TreeSet<Stat>();
 
-        Set<Stat> localStatsCopy = new TreeSet<Stat>(localStats);
+        HashMap<Integer, TreeSet<Stat>> localStatsCopy;
 
-        Stat[] stats = (Stat[])localStatsCopy.toArray(new Stat[localStatsCopy.size()]);
+        synchronized (localStats)
+        {
+            localStatsCopy = new HashMap<Integer, TreeSet<Stat>>(localStats);
+        }
+
+        TreeSet<Stat> lclStats = new TreeSet<Stat>();
+
+        Set<Integer> nodes = localStatsCopy.keySet();
+
+        Integer[] nodesArray = (Integer[])nodes.toArray(new Integer[nodes.size()]);
+
+        for (int i = 0; i<nodesArray.length; i++)
+        {
+            Stat[] support = (Stat[])localStatsCopy.get(nodesArray[i]).toArray(new Stat[localStatsCopy.size()]);
+
+            for (int j = 0; j<support.length; j++)
+            {
+                lclStats.add(support[j]);
+            }
+        }
+
+        Stat[] stats = (Stat[])lclStats.toArray(new Stat[lclStats.size()]);
 
         int numStats = Math.min(n, stats.length);
 
@@ -258,7 +305,12 @@ public class City
 //        Set<Stat> localStats = node.getLocalStats();
 //        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
 
-        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
+        Stat[] stats;
+
+        synchronized (localStats.get(id))
+        {
+            stats = (Stat[]) localStats.get(id).toArray(new Stat[localStats.size()]);
+        }
 
         int numStats = Math.min(n, stats.length);
 
@@ -286,7 +338,11 @@ public class City
 
     public double getNodeStatsMean(int id, int n)
     {
-        Stat[] stats = (Stat[]) localStats.toArray(new Stat[localStats.size()]);
+        Stat[] stats;
+        synchronized (localStats.get(id))
+        {
+            stats = (Stat[]) localStats.get(id).toArray(new Stat[localStats.size()]);
+        }
 
         int numStats = Math.min(n, stats.length);
 
@@ -304,7 +360,10 @@ public class City
 
     public double getGlobalStatsStandardDeviation(int n)
     {
-        Set<Stat> localStatsCopy = new TreeSet<Stat>(localStats);
+        Set<Stat> localStatsCopy;
+        synchronized (globalStats) {
+            localStatsCopy = new TreeSet<Stat>(globalStats);
+        }
 
         Stat[] stats = (Stat[])localStatsCopy.toArray(new Stat[localStatsCopy.size()]);
 
@@ -329,7 +388,11 @@ public class City
 
     public double getGlobalStatsMean(int n)
     {
-        Set<Stat> localStatsCopy = new TreeSet<Stat>(localStats);
+        Set<Stat> localStatsCopy;
+
+        synchronized (globalStats) {
+            localStatsCopy = new TreeSet<Stat>(globalStats);
+        }
 
         Stat[] stats = (Stat[])localStatsCopy.toArray(new Stat[localStatsCopy.size()]);
 

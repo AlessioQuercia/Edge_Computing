@@ -56,6 +56,19 @@ public final class CoordServiceGrpc {
               beans.CoordServiceOuterClass.NodeResponse.getDefaultInstance()))
           .setSchemaDescriptor(new CoordServiceMethodDescriptorSupplier("adviceNode"))
           .build();
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static final io.grpc.MethodDescriptor<beans.CoordServiceOuterClass.NodeRequest,
+      beans.CoordServiceOuterClass.NodeResponse> METHOD_HI_COORDINATOR =
+      io.grpc.MethodDescriptor.<beans.CoordServiceOuterClass.NodeRequest, beans.CoordServiceOuterClass.NodeResponse>newBuilder()
+          .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+          .setFullMethodName(generateFullMethodName(
+              "beans.CoordService", "hiCoordinator"))
+          .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              beans.CoordServiceOuterClass.NodeRequest.getDefaultInstance()))
+          .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              beans.CoordServiceOuterClass.NodeResponse.getDefaultInstance()))
+          .setSchemaDescriptor(new CoordServiceMethodDescriptorSupplier("hiCoordinator"))
+          .build();
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -101,6 +114,13 @@ public final class CoordServiceGrpc {
       asyncUnimplementedUnaryCall(METHOD_ADVICE_NODE, responseObserver);
     }
 
+    /**
+     */
+    public void hiCoordinator(beans.CoordServiceOuterClass.NodeRequest request,
+        io.grpc.stub.StreamObserver<beans.CoordServiceOuterClass.NodeResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(METHOD_HI_COORDINATOR, responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -117,6 +137,13 @@ public final class CoordServiceGrpc {
                 beans.CoordServiceOuterClass.NodeRequest,
                 beans.CoordServiceOuterClass.NodeResponse>(
                   this, METHODID_ADVICE_NODE)))
+          .addMethod(
+            METHOD_HI_COORDINATOR,
+            asyncUnaryCall(
+              new MethodHandlers<
+                beans.CoordServiceOuterClass.NodeRequest,
+                beans.CoordServiceOuterClass.NodeResponse>(
+                  this, METHODID_HI_COORDINATOR)))
           .build();
     }
   }
@@ -157,6 +184,14 @@ public final class CoordServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(METHOD_ADVICE_NODE, getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void hiCoordinator(beans.CoordServiceOuterClass.NodeRequest request,
+        io.grpc.stub.StreamObserver<beans.CoordServiceOuterClass.NodeResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(METHOD_HI_COORDINATOR, getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -192,6 +227,13 @@ public final class CoordServiceGrpc {
     public beans.CoordServiceOuterClass.NodeResponse adviceNode(beans.CoordServiceOuterClass.NodeRequest request) {
       return blockingUnaryCall(
           getChannel(), METHOD_ADVICE_NODE, getCallOptions(), request);
+    }
+
+    /**
+     */
+    public beans.CoordServiceOuterClass.NodeResponse hiCoordinator(beans.CoordServiceOuterClass.NodeRequest request) {
+      return blockingUnaryCall(
+          getChannel(), METHOD_HI_COORDINATOR, getCallOptions(), request);
     }
   }
 
@@ -231,10 +273,19 @@ public final class CoordServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(METHOD_ADVICE_NODE, getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<beans.CoordServiceOuterClass.NodeResponse> hiCoordinator(
+        beans.CoordServiceOuterClass.NodeRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(METHOD_HI_COORDINATOR, getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_ASK_FOR_COORDINATOR = 0;
   private static final int METHODID_ADVICE_NODE = 1;
+  private static final int METHODID_HI_COORDINATOR = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -259,6 +310,10 @@ public final class CoordServiceGrpc {
           break;
         case METHODID_ADVICE_NODE:
           serviceImpl.adviceNode((beans.CoordServiceOuterClass.NodeRequest) request,
+              (io.grpc.stub.StreamObserver<beans.CoordServiceOuterClass.NodeResponse>) responseObserver);
+          break;
+        case METHODID_HI_COORDINATOR:
+          serviceImpl.hiCoordinator((beans.CoordServiceOuterClass.NodeRequest) request,
               (io.grpc.stub.StreamObserver<beans.CoordServiceOuterClass.NodeResponse>) responseObserver);
           break;
         default:
@@ -324,6 +379,7 @@ public final class CoordServiceGrpc {
               .setSchemaDescriptor(new CoordServiceFileDescriptorSupplier())
               .addMethod(METHOD_ASK_FOR_COORDINATOR)
               .addMethod(METHOD_ADVICE_NODE)
+              .addMethod(METHOD_HI_COORDINATOR)
               .build();
         }
       }

@@ -5,11 +5,14 @@ message ElectionRequest
 {
 	string status = 1;
     int32 value = 2;
+    int64 timestamp = 3;
 }
 
 message ElectionResponse
 {
-    string ack = 1;
+	int32 nodeId = 1;
+    string ack = 2;
+    int64 timestamp = 3;
 }
 
 // Defining a Service, a Service can have multiple RPC operations

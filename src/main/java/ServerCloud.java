@@ -13,7 +13,8 @@ public class ServerCloud {
     private static final int PORT = 1337;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException
+    {
         HttpServer server = HttpServerFactory.create("http://"+HOST+":"+PORT+"/");
         server.start();
 

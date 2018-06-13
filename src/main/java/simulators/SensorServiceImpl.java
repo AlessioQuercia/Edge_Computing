@@ -1,14 +1,13 @@
 package simulators;
 
-import beans.Buffer;
-import beans.Node;
+import beans.MeasurementsBuffer;
 import io.grpc.stub.StreamObserver;
 
 import java.util.ArrayList;
 
 public class SensorServiceImpl extends SensorServiceGrpc.SensorServiceImplBase {
 
-    private Buffer measurementsBuffer;
+    private MeasurementsBuffer measurementsBuffer;
 
     public Object bufferLock = new Object();
 
@@ -16,7 +15,7 @@ public class SensorServiceImpl extends SensorServiceGrpc.SensorServiceImplBase {
 
     public SensorServiceImpl()
     {
-        this.measurementsBuffer = new Buffer();
+        this.measurementsBuffer = new MeasurementsBuffer();
     }
 
     @Override
@@ -30,12 +29,18 @@ public class SensorServiceImpl extends SensorServiceGrpc.SensorServiceImplBase {
                 Measurement m = new Measurement(measurementRequest.getId(), measurementRequest.getType(),
                         measurementRequest.getValue(), measurementRequest.getTimestamp());
                 measurementsBuffer.put(m);
+
                 synchronized (bufferLock)
                 {
                     if (insertCounter == 40)
+                    {
+//                        System.out.println("Notify");
                         bufferLock.notifyAll();
+                    }
                     else
+                    {
                         insertCounter++;
+                    }
                 }
 //                System.out.println("Measurement received!");
             }
@@ -71,13 +76,13 @@ public class SensorServiceImpl extends SensorServiceGrpc.SensorServiceImplBase {
         return new ArrayList<Measurement>(measurementsBuffer.buffer);
     }
 
-    public Buffer getBuffer()
+    public MeasurementsBuffer getBuffer()
     {
         return measurementsBuffer;
     }
 
     public void resetInsertCounter()
     {
-        insertCounter = 20;
+        insertCounter -= 20;
     }
 }

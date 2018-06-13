@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Buffer
+public class MeasurementsBuffer
 {
     public ArrayList<Measurement> buffer = new ArrayList<Measurement>();
 
@@ -42,8 +42,6 @@ public class Buffer
 
     public synchronized void freeTwenty()
     {
-        Measurement measurement = null;
-
         while(buffer.size() == 0)
         {
             try
@@ -64,4 +62,5 @@ public class Buffer
             }
         }
     }
+
 }

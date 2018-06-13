@@ -66,7 +66,7 @@ public class Analist
                 switch (selectedService)
                 {
                     case 1: {
-                        method = "/getGrid";
+                        method = "/getList";
 
                         break;
                     }

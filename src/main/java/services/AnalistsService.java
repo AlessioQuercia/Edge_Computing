@@ -10,12 +10,12 @@ import javax.ws.rs.core.Response;
 public class AnalistsService
 {
     //Returns the city grid
-    @Path("getGrid")
+    @Path("getList")
     @GET
     @Produces({"application/json", "application/xml"})
-    public Response getNodesGrid()
+    public Response getNodesList()
     {
-        return Response.ok(City.getInstance().getNodesGrid()).build();
+        return Response.ok(City.getInstance().getNodesList()).build();
     }
 
     //Returns last n stats (with timestamp) produced by a specific Edge Node

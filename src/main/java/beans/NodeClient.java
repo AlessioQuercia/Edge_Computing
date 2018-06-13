@@ -58,7 +58,7 @@ public class NodeClient extends Thread
 
         while (!stop)
         {
-            Set<Stat> localStats = node.getLocalStats();
+            Set<Stat> localStats = node.getLocalStatsCopy();
             Stat[] statsCopy = localStats.toArray(new Stat[localStats.size()]);
 
             if (statsCopy.length > 0)
@@ -92,7 +92,7 @@ public class NodeClient extends Thread
 
                 // Send local stats
                 method = "/sendLocalStats";
-                input = gson.toJson(node.getLocalStats());
+                input = gson.toJson(node.getLocalStatsCopy());
                 //            params = "/" + node.getStats();
 
                 resource = client.resource(nodesServices + method);
