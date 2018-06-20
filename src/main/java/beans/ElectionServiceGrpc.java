@@ -43,6 +43,19 @@ public final class ElectionServiceGrpc {
               beans.ElectionServiceOuterClass.ElectionResponse.getDefaultInstance()))
           .setSchemaDescriptor(new ElectionServiceMethodDescriptorSupplier("sendElectionMessage"))
           .build();
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static final io.grpc.MethodDescriptor<beans.ElectionServiceOuterClass.ElectionRequest,
+      beans.ElectionServiceOuterClass.ElectionResponse> METHOD_STREAM_ELECTION_MESSAGE =
+      io.grpc.MethodDescriptor.<beans.ElectionServiceOuterClass.ElectionRequest, beans.ElectionServiceOuterClass.ElectionResponse>newBuilder()
+          .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+          .setFullMethodName(generateFullMethodName(
+              "beans.ElectionService", "streamElectionMessage"))
+          .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              beans.ElectionServiceOuterClass.ElectionRequest.getDefaultInstance()))
+          .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              beans.ElectionServiceOuterClass.ElectionResponse.getDefaultInstance()))
+          .setSchemaDescriptor(new ElectionServiceMethodDescriptorSupplier("streamElectionMessage"))
+          .build();
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -81,6 +94,13 @@ public final class ElectionServiceGrpc {
       asyncUnimplementedUnaryCall(METHOD_SEND_ELECTION_MESSAGE, responseObserver);
     }
 
+    /**
+     */
+    public io.grpc.stub.StreamObserver<beans.ElectionServiceOuterClass.ElectionRequest> streamElectionMessage(
+        io.grpc.stub.StreamObserver<beans.ElectionServiceOuterClass.ElectionResponse> responseObserver) {
+      return asyncUnimplementedStreamingCall(METHOD_STREAM_ELECTION_MESSAGE, responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -90,6 +110,13 @@ public final class ElectionServiceGrpc {
                 beans.ElectionServiceOuterClass.ElectionRequest,
                 beans.ElectionServiceOuterClass.ElectionResponse>(
                   this, METHODID_SEND_ELECTION_MESSAGE)))
+          .addMethod(
+            METHOD_STREAM_ELECTION_MESSAGE,
+            asyncBidiStreamingCall(
+              new MethodHandlers<
+                beans.ElectionServiceOuterClass.ElectionRequest,
+                beans.ElectionServiceOuterClass.ElectionResponse>(
+                  this, METHODID_STREAM_ELECTION_MESSAGE)))
           .build();
     }
   }
@@ -121,6 +148,14 @@ public final class ElectionServiceGrpc {
         io.grpc.stub.StreamObserver<beans.ElectionServiceOuterClass.ElectionResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(METHOD_SEND_ELECTION_MESSAGE, getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<beans.ElectionServiceOuterClass.ElectionRequest> streamElectionMessage(
+        io.grpc.stub.StreamObserver<beans.ElectionServiceOuterClass.ElectionResponse> responseObserver) {
+      return asyncBidiStreamingCall(
+          getChannel().newCall(METHOD_STREAM_ELECTION_MESSAGE, getCallOptions()), responseObserver);
     }
   }
 
@@ -184,6 +219,7 @@ public final class ElectionServiceGrpc {
   }
 
   private static final int METHODID_SEND_ELECTION_MESSAGE = 0;
+  private static final int METHODID_STREAM_ELECTION_MESSAGE = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -216,6 +252,9 @@ public final class ElectionServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_STREAM_ELECTION_MESSAGE:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.streamElectionMessage(
+              (io.grpc.stub.StreamObserver<beans.ElectionServiceOuterClass.ElectionResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -268,6 +307,7 @@ public final class ElectionServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new ElectionServiceFileDescriptorSupplier())
               .addMethod(METHOD_SEND_ELECTION_MESSAGE)
+              .addMethod(METHOD_STREAM_ELECTION_MESSAGE)
               .build();
         }
       }

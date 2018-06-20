@@ -3,9 +3,10 @@ package beans;
 
 message ElectionRequest
 {
-	string status = 1;
-    int32 value = 2;
-    int64 timestamp = 3;
+	int32 nodeId = 1;
+	string status = 2;
+    int32 value = 3;
+    int64 timestamp = 4;
 }
 
 message ElectionResponse
@@ -18,5 +19,6 @@ message ElectionResponse
 // Defining a Service, a Service can have multiple RPC operations
 service ElectionService 
 {
-    rpc sendElectionMessage(ElectionRequest) returns (ElectionResponse);
+	rpc sendElectionMessage(ElectionRequest) returns (ElectionResponse);
+    rpc streamElectionMessage(stream ElectionRequest) returns (stream ElectionResponse);
 }

@@ -1199,9 +1199,11 @@ public final class NodeServiceOuterClass {
       "equest\022\016\n\006nodeId\030\001 \001(\005\022\r\n\005value\030\002 \001(\001\022\021\n" +
       "\ttimestamp\030\003 \001(\003\"F\n\022GlobalStatResponse\022\016" +
       "\n\006nodeId\030\001 \001(\005\022\r\n\005value\030\002 \001(\001\022\021\n\ttimesta" +
-      "mp\030\003 \001(\0032\\\n\013NodeService\022M\n\023streamToCoord" +
-      "inator\022\027.beans.LocalStatRequest\032\031.beans." +
-      "GlobalStatResponse(\0010\001b\006proto3"
+      "mp\030\003 \001(\0032\245\001\n\013NodeService\022G\n\021sendToCoordi" +
+      "nator\022\027.beans.LocalStatRequest\032\031.beans.G" +
+      "lobalStatResponse\022M\n\023streamToCoordinator" +
+      "\022\027.beans.LocalStatRequest\032\031.beans.Global" +
+      "StatResponse(\0010\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

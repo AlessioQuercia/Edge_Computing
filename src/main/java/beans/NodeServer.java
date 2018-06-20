@@ -261,7 +261,7 @@
 //                        if (nextNode != null)
 //                        {
 //                            System.out.println(nextNode + " " + nextNode.getState());
-//                            node.sendElectionMessage(nextNode, "ELECTING", node.getId());
+//                            node.streamElectionMessageToNextNode(nextNode, "ELECTING", node.getId());
 //                        }
 //
 //                        else {

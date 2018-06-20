@@ -7,6 +7,7 @@ import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.MediaType;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Set;
 
@@ -15,6 +16,8 @@ public class NodeClient extends Thread
     private Node node;
 
     private Client client;
+
+    private URL url;
 
     private HttpURLConnection conn;
 
@@ -26,13 +29,30 @@ public class NodeClient extends Thread
 
     private long lastTime;
 
-    public NodeClient(Node node, String serverAddress)
+    private static NodeClient nodeClient;
+
+    public boolean[] sentOne;
+
+    public static NodeClient getNodeClientInstance(Node node, String serverAddress)
+    {
+        if (nodeClient == null)
+            nodeClient = new NodeClient(node, serverAddress);
+        return nodeClient;
+    }
+
+    public static void resetNodeClientInstance()
+    {
+        nodeClient = null;
+    }
+
+    private NodeClient(Node node, String serverAddress)
     {
         this.node = node;
         this.serverAddress = serverAddress;
         this.stop = false;
         this.midnight = computeMidnightMilliseconds();
         this.lastTime = System.currentTimeMillis();
+        this.sentOne = new boolean[101];
     }
 
     @Override
@@ -42,7 +62,7 @@ public class NodeClient extends Thread
 
         client = Client.create();
         try {
-            URL url = new URL(serverAddress);
+            url = new URL(serverAddress);
             conn = (HttpURLConnection) url.openConnection();
             conn.connect();
 
@@ -63,6 +83,10 @@ public class NodeClient extends Thread
 
             if (statsCopy.length > 0)
             {
+                // Controlla se qualche nodo è uscito dalla rete e in tal caso rimuovilo e avvisa gli altri
+                if (node.getNodesListCopy().size() > 1 && node.getGlobalStatsCopy().size() > 0)
+                    checkNodesList();
+
                 // Compute global stat
 
                 double sum = 0;
@@ -72,7 +96,7 @@ public class NodeClient extends Thread
 
                 double mean = sum / statsCopy.length;
 
-                Stat globalStat = new Stat(node.getId(), mean, deltaTime());
+                Stat globalStat = new Stat(node.getId(), mean, node.deltaTime());
 
                 // Store global stat
                 node.addGlobalStat(globalStat);
@@ -99,7 +123,7 @@ public class NodeClient extends Thread
                 response = resource.type(MediaType.APPLICATION_JSON_TYPE)
                         .post(ClientResponse.class, input);
 
-                System.out.println(response);
+//                System.out.println(response);
 
             }
 
@@ -129,7 +153,8 @@ public class NodeClient extends Thread
         System.out.println("SONO FUORI");
     }
 
-    private long computeMidnightMilliseconds(){
+    private long computeMidnightMilliseconds()
+    {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
@@ -155,5 +180,74 @@ public class NodeClient extends Thread
     public HttpURLConnection getConn()
     {
         return conn;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
+
+    public void setUrl(URL url) {
+        this.url = url;
+    }
+
+    public void setConn(HttpURLConnection conn) {
+        this.conn = conn;
+    }
+
+    private void checkNodesList()
+    {
+        Set<Stat> localStatsCopy = node.getLocalStatsCopy();
+        Set<Stat> globalStatsCopy = node.getGlobalStatsCopy();
+
+        Stat[] localStatsCopyArray = localStatsCopy.toArray(new Stat[localStatsCopy.size()]);
+        Stat[] globalStatsCopyArray = globalStatsCopy.toArray(new Stat[globalStatsCopy.size()]);
+
+        ArrayList<Stat> lastStatForEachNode = new ArrayList<>();
+
+        ArrayList<Integer> addedNode = new ArrayList<>();
+
+        ArrayList<Node> nodesListCopy = node.getNodesListCopy();
+
+        for (int i = localStatsCopyArray.length -1; i >= 0; i--)
+        {
+            Stat stat = localStatsCopyArray[i];
+
+            if (!addedNode.contains(stat.getNodeId()))
+            {
+                addedNode.add(stat.getNodeId());
+                lastStatForEachNode.add(stat);
+            }
+            if (addedNode.size() == nodesListCopy.size())
+                break;
+
+        }
+
+        for (Stat stat : lastStatForEachNode)
+        {
+            if (stat.getTimestamp() < globalStatsCopyArray[globalStatsCopyArray.length-1].getTimestamp())
+            {
+                Node n = node.getNodeFromNodesList(stat.getNodeId());
+                node.removeNodeFromNodesList(n);
+                node.updateNextNodes(node);
+                node.adviceNodes(node, n, "RIMOSSO");
+                System.out.println("RIMOSSO NODO " + n);
+            }
+        }
+
+//        for (Node n : nodesListCopy)
+//        {
+//            if (!addedNode.contains(n.getId()) && sentOne[n.getId()])
+//            {
+//                node.removeNodeFromNodesList(n);
+//                node.updateNextNodes(node);
+//                node.adviceNodes(node, n, "RIMOSSO");
+//                System.out.println("RIMOSSO NODO " + n);
+//            }
+//        }
+
     }
 }

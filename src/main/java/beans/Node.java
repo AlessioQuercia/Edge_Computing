@@ -9,6 +9,7 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -16,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /* Node representing an Edge node */
 @XmlRootElement(name = "node")
@@ -65,7 +67,22 @@ public class Node
 
     private ArrayList<Node> removedNodes;
 
-    Object waitForCoordinator = new Object();
+    int receivedId;
+
+    boolean sending;
+
+    ManagedChannel nextNodeChannel;
+
+    ElectionServiceGrpc.ElectionServiceStub nextNodeStub;
+
+    Node connectedNode;
+
+    String lastRequestStatus;
+    boolean resend;
+
+    int sendTries;
+
+    ElectionRequestMessage lastMessageSent;
 
     public Node () {};
 
@@ -88,6 +105,11 @@ public class Node
         this.midnight = computeMidnightMilliseconds();
         this.removedNodes = new ArrayList<Node>();
         this.coordinatorPort = -1;
+        this.receivedId = -1;
+        this.sending = false;
+        this.resend = false;
+        this.sendTries = 3;
+        this.lastMessageSent = null;
     }
 
     public int getId()
@@ -222,7 +244,14 @@ public class Node
     {
         synchronized (nodesList)
         {
-            if (!nodesList.contains(node))
+            boolean alreadyIn = false;
+            for (Node n : nodesList)
+            {
+                if (n.getId() == node.getId())
+                    alreadyIn = true;
+            }
+
+            if (!alreadyIn)
                 nodesList.add(node);
         }
     }
@@ -350,7 +379,8 @@ public class Node
         this.nodeServerToNodes = nodeServerToNodes;
     }
 
-    public long computeMidnightMilliseconds(){
+    public long computeMidnightMilliseconds()
+    {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
@@ -519,7 +549,7 @@ public class Node
 
                     System.out.println(thisNode.getState());
 
-                    thisNode.setNodeClient(new NodeClient(thisNode, serverAddress));
+                    thisNode.setNodeClient(NodeClient.getNodeClientInstance(thisNode, serverAddress));
                     thisNode.nodeClient.start();
 
                     break;
@@ -544,11 +574,12 @@ public class Node
                             thisNode.updateNextNodes(thisNode);
                             if (thisNode.getNextNodesCopy().size() > 0) {
                                 nextNode = thisNode.getNextNodesCopy().get(0);
+                                thisNode.connectToNextNode(nextNode);
                             }
                             else
                             {
                                 thisNode.setState(State.COORDINATOR);
-                                thisNode.setNodeClient(new NodeClient(thisNode, serverAddress));
+                                thisNode.setNodeClient(NodeClient.getNodeClientInstance(thisNode, serverAddress));
                                 thisNode.nodeClient.start();
                                 break;
                             }
@@ -565,13 +596,22 @@ public class Node
                     // che si è unito alla struttura
                     thisNode.hiCoordinator("");
 
+                    // Apre uno stream con il nodo successivo
+                    if (thisNode.getNextNodesCopy().size() > 0)
+                    {
+                        Node nextNd = thisNode.getNextNodesCopy().get(0);
+                        thisNode.connectToNextNode(nextNd);
+                    }
+
 //                    // Avverte il nodo/i due nodi precedenti che si è aggiunto nella struttura e che farà parte dei loro prossimi nodi
 //                    thisNode.advicePreviousNodes(thisNode);
 
-                    for (int i = 0; i<nodeList.size(); i++)
+                    ArrayList<Node> copy = thisNode.getNodesListCopy();
+
+                    for (int i = 0; i<copy.size(); i++)
                     {
-                        if (nodeList.get(i).getNodesPort() == thisNode.getCoordinatorPort())
-                            nodeList.get(i).setState(State.COORDINATOR);
+                        if (copy.get(i).getNodesPort() == thisNode.getCoordinatorPort())
+                            copy.get(i).setState(State.COORDINATOR);
                     }
 
                     System.out.println(thisNode.getNextNodesCopy());
@@ -611,7 +651,13 @@ public class Node
                 if (response.getStatus() == ClientResponse.Status.OK.getStatusCode())
                 {
                     // Vengono chiuse tutte le connessioni e il nodo esce
-                    // CHIUDERE LA CONNESSIONE CON GLI ALTRI NODI
+                    thisNode.nextNodeChannel.shutdownNow();
+//                    try {
+//                        thisNode.nextNodeChannel.awaitTermination(3000, TimeUnit.SECONDS);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+
                     synchronized (thisNode.getNodeServerToSensors().getSensorsService().bufferLock)
                     {
                         thisNode.getNodeServerToSensors().setStop();
@@ -635,6 +681,7 @@ public class Node
                         thisNode.nodeClient.setStop();
                         thisNode.nodeClient.getConn().disconnect();
                         thisNode.nodeClient.getClient().destroy();
+                        NodeClient.resetNodeClientInstance();
                     }
 
 //                    conn.disconnect();
@@ -868,31 +915,205 @@ public class Node
 //        return coordPort;
     }
 
-    public void sendElectionMessage(Node nextNode, String requestStatus, int requestValue)
+    public void connectToNextNode(Node nextNode)
     {
-        //plaintext channel on the address (ip/port) which offers the MethodsService service
+        if (connectedNode == null || connectedNode.getId() != nextNode.getId())
+        {
+            if (connectedNode != null)
+            {
+                nextNodeChannel.shutdown();
+            }
+
+            //plaintext channel on the address (ip/port) which offers the MethodsService service
+            nextNodeChannel = ManagedChannelBuilder.forTarget("localhost:" + nextNode.getNodesPort()).usePlaintext(true).build();
+
+            //creating a stub on the channel
+            nextNodeStub = ElectionServiceGrpc.newStub(nextNodeChannel);
+
+            connectedNode = nextNode;
+        }
+    }
+
+    public void sendElectionMessageToNextNode(final Node thisNode, final Node nextNode, String requestStatus, int requestValue)
+    {
+        thisNode.lastRequestStatus = requestStatus;
+
+        //plaintext channel on the address (ip/port) which offers the GreetingService service
         final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + nextNode.getNodesPort()).usePlaintext(true).build();
 
-        //creating a blocking stub on the channel
-        ElectionServiceGrpc.ElectionServiceBlockingStub stub = ElectionServiceGrpc.newBlockingStub(channel);
+        //creating an asynchronous stub on the channel
+        ElectionServiceGrpc.ElectionServiceStub stub = ElectionServiceGrpc.newStub(channel);
 
         //creating the HelloResponse object which will be provided as input to the RPC method
         ElectionServiceOuterClass.ElectionRequest request = ElectionServiceOuterClass.ElectionRequest.newBuilder().
+                setNodeId(thisNode.getId()).
                 setStatus(requestStatus).
                 setValue(requestValue).
                 setTimestamp(deltaTime()).
                 build();
 
-        //calling the method. it returns an instance of HelloResponse
-        ElectionServiceOuterClass.ElectionResponse response = stub.sendElectionMessage(request);
+        System.out.println("SENT_MESSAGE " + request.getValue() + " TO NODE " + nextNode + ", STATUS: " + request.getStatus());
 
-        Message electionResponseMessage = new ElectionResponseMessage("electionMessageReceived", response.getTimestamp(),
-                response.getNodeId(), response.getAck());
+        if (!thisNode.resend) {
+            lastMessageSent = new ElectionRequestMessage("electionRequestMessage", request.getTimestamp(), request.getNodeId(),
+                    request.getStatus(), request.getValue());
+        }
 
-        getMessagesBuffer().put(electionResponseMessage);
+        stub.sendElectionMessage(request, new StreamObserver<ElectionServiceOuterClass.ElectionResponse>() {
+            @Override
+            //this hanlder takes care of each item received in the stream
+            public void onNext(ElectionServiceOuterClass.ElectionResponse electionResponse)
+            {
+                Message electionResponseMessage = new ElectionResponseMessage("electionResponseMessage", electionResponse.getTimestamp(),
+                        electionResponse.getNodeId(), electionResponse.getAck());
 
-        //closing the channel
-        channel.shutdown();
+                getMessagesBuffer().put(electionResponseMessage);
+
+                synchronized (thisNode.getNodeServerToNodes().waitForAckLock)
+                {
+                    thisNode.getNodeServerToNodes().waitForAckLock.notifyAll();
+                }
+
+            }
+
+            @Override
+            //if there are some errors, this method will be called
+            public void onError(Throwable throwable)
+            {
+                if (getNodeFromNodesList(nextNode.getId()) != null && thisNode.getState() == State.ELECTING_COORDINATOR)
+                {
+                    System.out.println(throwable.getMessage() + " ERRORE DURANTE LA RICEZIONE DELLA RISPOSTA");
+
+                    thisNode.resend = true;
+
+                    synchronized (thisNode.getNodeServerToNodes().waitForAckLock)
+                    {
+                        thisNode.getNodeServerToNodes().waitForAckLock.notifyAll();
+                    }
+                }
+            }
+
+            @Override
+            //when the stream is completed (the server called "onCompleted") just close the channel
+            public void onCompleted()
+            {
+                channel.shutdownNow();
+            }
+        });
+
+        synchronized (thisNode.getNodeServerToNodes().waitForAckLock)
+        {
+            try {
+                thisNode.getNodeServerToNodes().waitForAckLock.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void streamElectionMessageToNextNode(final Node thisNode, final Node nextNode, String requestStatus, int requestValue)
+    {
+//        //plaintext channel on the address (ip/port) which offers the MethodsService service
+//        nextNodeChannel = ManagedChannelBuilder.forTarget("localhost:" + nextNode.getNodesPort()).usePlaintext(true).build();
+//
+//        //creating a stub on the channel
+//        nextNodeStub = ElectionServiceGrpc.newStub(nextNodeChannel);
+
+        thisNode.lastRequestStatus = requestStatus;
+
+        final StreamObserver<ElectionServiceOuterClass.ElectionRequest> requestStreamObserver = nextNodeStub.streamElectionMessage(new StreamObserver<ElectionServiceOuterClass.ElectionResponse>() {
+            @Override
+            public void onNext(ElectionServiceOuterClass.ElectionResponse electionResponse)
+            {
+                Message electionResponseMessage = new ElectionResponseMessage("electionResponseMessage", electionResponse.getTimestamp(),
+                        electionResponse.getNodeId(), electionResponse.getAck());
+
+                getMessagesBuffer().put(electionResponseMessage);
+
+                synchronized (thisNode.getNodeServerToNodes().waitForAckLock)
+                {
+                    thisNode.getNodeServerToNodes().waitForAckLock.notifyAll();
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable)
+            {
+                if (getNodeFromNodesList(nextNode.getId()) != null && thisNode.getState() == State.ELECTING_COORDINATOR)
+                {
+                    System.out.println(throwable.getMessage() + " ERRORE DURANTE LA RICEZIONE DELLA RISPOSTA");
+
+                    thisNode.resend = true;
+
+                    synchronized (thisNode.getNodeServerToNodes().waitForAckLock)
+                    {
+                        thisNode.getNodeServerToNodes().waitForAckLock.notifyAll();
+                    }
+                }
+            }
+
+            @Override
+            public void onCompleted() {
+                nextNodeChannel.shutdownNow();
+            }
+        });
+
+        //creating the HelloResponse object which will be provided as input to the RPC method
+        ElectionServiceOuterClass.ElectionRequest request = ElectionServiceOuterClass.ElectionRequest.newBuilder().
+                setNodeId(thisNode.getId()).
+                setStatus(requestStatus).
+                setValue(requestValue).
+                setTimestamp(deltaTime()).
+                build();
+
+        System.out.println("SENT_MESSAGE " + request.getValue() + " TO NODE " + nextNode + ", STATUS: " + request.getStatus());
+
+        if (!thisNode.resend) {
+            lastMessageSent = new ElectionRequestMessage("electionRequestMessage", request.getTimestamp(), request.getNodeId(),
+                    request.getStatus(), request.getValue());
+        }
+
+        try
+        {
+            requestStreamObserver.onNext(request);
+
+            synchronized (thisNode.getNodeServerToNodes().waitForAckLock)
+            {
+                try {
+                    thisNode.getNodeServerToNodes().waitForAckLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println("ERRORE DURANTE L'INVIO DEL MESSAGGIO AL NODO " + nextNode);
+
+            if (getNodeFromNodesList(nextNode.getId()) != null)
+            {
+                thisNode.resend = true;
+            }
+
+        }
+
+//        //creating the HelloResponse object which will be provided as input to the RPC method
+//        ElectionServiceOuterClass.ElectionRequest request = ElectionServiceOuterClass.ElectionRequest.newBuilder().
+//                setStatus(requestStatus).
+//                setValue(requestValue).
+//                setTimestamp(deltaTime()).
+//                build();
+
+//        //calling the method. it returns an instance of HelloResponse
+//        ElectionServiceOuterClass.ElectionResponse response = stub.streamElectionMessageToNextNode(request);
+//
+//        Message electionResponseMessage = new ElectionResponseMessage("electionMessageReceived", response.getTimestamp(),
+//                response.getNodeId(), response.getAck());
+//
+//        getMessagesBuffer().put(electionResponseMessage);
+
+//        //closing the channel
+//        channel.shutdown();
     }
 
     public void sendUpdatePreviousNodeMessage(Node nodeToAdvise, Node node, String type)

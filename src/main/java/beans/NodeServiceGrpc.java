@@ -32,6 +32,19 @@ public final class NodeServiceGrpc {
   // Static method descriptors that strictly reflect the proto.
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   public static final io.grpc.MethodDescriptor<beans.NodeServiceOuterClass.LocalStatRequest,
+      beans.NodeServiceOuterClass.GlobalStatResponse> METHOD_SEND_TO_COORDINATOR =
+      io.grpc.MethodDescriptor.<beans.NodeServiceOuterClass.LocalStatRequest, beans.NodeServiceOuterClass.GlobalStatResponse>newBuilder()
+          .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+          .setFullMethodName(generateFullMethodName(
+              "beans.NodeService", "sendToCoordinator"))
+          .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              beans.NodeServiceOuterClass.LocalStatRequest.getDefaultInstance()))
+          .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+              beans.NodeServiceOuterClass.GlobalStatResponse.getDefaultInstance()))
+          .setSchemaDescriptor(new NodeServiceMethodDescriptorSupplier("sendToCoordinator"))
+          .build();
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static final io.grpc.MethodDescriptor<beans.NodeServiceOuterClass.LocalStatRequest,
       beans.NodeServiceOuterClass.GlobalStatResponse> METHOD_STREAM_TO_COORDINATOR =
       io.grpc.MethodDescriptor.<beans.NodeServiceOuterClass.LocalStatRequest, beans.NodeServiceOuterClass.GlobalStatResponse>newBuilder()
           .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
@@ -76,6 +89,13 @@ public final class NodeServiceGrpc {
 
     /**
      */
+    public void sendToCoordinator(beans.NodeServiceOuterClass.LocalStatRequest request,
+        io.grpc.stub.StreamObserver<beans.NodeServiceOuterClass.GlobalStatResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(METHOD_SEND_TO_COORDINATOR, responseObserver);
+    }
+
+    /**
+     */
     public io.grpc.stub.StreamObserver<beans.NodeServiceOuterClass.LocalStatRequest> streamToCoordinator(
         io.grpc.stub.StreamObserver<beans.NodeServiceOuterClass.GlobalStatResponse> responseObserver) {
       return asyncUnimplementedStreamingCall(METHOD_STREAM_TO_COORDINATOR, responseObserver);
@@ -83,6 +103,13 @@ public final class NodeServiceGrpc {
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+          .addMethod(
+            METHOD_SEND_TO_COORDINATOR,
+            asyncUnaryCall(
+              new MethodHandlers<
+                beans.NodeServiceOuterClass.LocalStatRequest,
+                beans.NodeServiceOuterClass.GlobalStatResponse>(
+                  this, METHODID_SEND_TO_COORDINATOR)))
           .addMethod(
             METHOD_STREAM_TO_COORDINATOR,
             asyncBidiStreamingCall(
@@ -117,6 +144,14 @@ public final class NodeServiceGrpc {
 
     /**
      */
+    public void sendToCoordinator(beans.NodeServiceOuterClass.LocalStatRequest request,
+        io.grpc.stub.StreamObserver<beans.NodeServiceOuterClass.GlobalStatResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(METHOD_SEND_TO_COORDINATOR, getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
     public io.grpc.stub.StreamObserver<beans.NodeServiceOuterClass.LocalStatRequest> streamToCoordinator(
         io.grpc.stub.StreamObserver<beans.NodeServiceOuterClass.GlobalStatResponse> responseObserver) {
       return asyncBidiStreamingCall(
@@ -144,6 +179,13 @@ public final class NodeServiceGrpc {
         io.grpc.CallOptions callOptions) {
       return new NodeServiceBlockingStub(channel, callOptions);
     }
+
+    /**
+     */
+    public beans.NodeServiceOuterClass.GlobalStatResponse sendToCoordinator(beans.NodeServiceOuterClass.LocalStatRequest request) {
+      return blockingUnaryCall(
+          getChannel(), METHOD_SEND_TO_COORDINATOR, getCallOptions(), request);
+    }
   }
 
   /**
@@ -166,9 +208,18 @@ public final class NodeServiceGrpc {
         io.grpc.CallOptions callOptions) {
       return new NodeServiceFutureStub(channel, callOptions);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<beans.NodeServiceOuterClass.GlobalStatResponse> sendToCoordinator(
+        beans.NodeServiceOuterClass.LocalStatRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(METHOD_SEND_TO_COORDINATOR, getCallOptions()), request);
+    }
   }
 
-  private static final int METHODID_STREAM_TO_COORDINATOR = 0;
+  private static final int METHODID_SEND_TO_COORDINATOR = 0;
+  private static final int METHODID_STREAM_TO_COORDINATOR = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -187,6 +238,10 @@ public final class NodeServiceGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_SEND_TO_COORDINATOR:
+          serviceImpl.sendToCoordinator((beans.NodeServiceOuterClass.LocalStatRequest) request,
+              (io.grpc.stub.StreamObserver<beans.NodeServiceOuterClass.GlobalStatResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -251,6 +306,7 @@ public final class NodeServiceGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new NodeServiceFileDescriptorSupplier())
+              .addMethod(METHOD_SEND_TO_COORDINATOR)
               .addMethod(METHOD_STREAM_TO_COORDINATOR)
               .build();
         }

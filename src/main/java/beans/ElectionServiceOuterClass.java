@@ -19,22 +19,27 @@ public final class ElectionServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string status = 1;</code>
+     * <code>int32 nodeId = 1;</code>
+     */
+    int getNodeId();
+
+    /**
+     * <code>string status = 2;</code>
      */
     java.lang.String getStatus();
     /**
-     * <code>string status = 1;</code>
+     * <code>string status = 2;</code>
      */
     com.google.protobuf.ByteString
         getStatusBytes();
 
     /**
-     * <code>int32 value = 2;</code>
+     * <code>int32 value = 3;</code>
      */
     int getValue();
 
     /**
-     * <code>int64 timestamp = 3;</code>
+     * <code>int64 timestamp = 4;</code>
      */
     long getTimestamp();
   }
@@ -51,6 +56,7 @@ public final class ElectionServiceOuterClass {
       super(builder);
     }
     private ElectionRequest() {
+      nodeId_ = 0;
       status_ = "";
       value_ = 0;
       timestamp_ = 0L;
@@ -87,18 +93,23 @@ public final class ElectionServiceOuterClass {
               }
               break;
             }
-            case 10: {
+            case 8: {
+
+              nodeId_ = input.readInt32();
+              break;
+            }
+            case 18: {
               java.lang.String s = input.readStringRequireUtf8();
 
               status_ = s;
               break;
             }
-            case 16: {
+            case 24: {
 
               value_ = input.readInt32();
               break;
             }
-            case 24: {
+            case 32: {
 
               timestamp_ = input.readInt64();
               break;
@@ -127,10 +138,19 @@ public final class ElectionServiceOuterClass {
               beans.ElectionServiceOuterClass.ElectionRequest.class, beans.ElectionServiceOuterClass.ElectionRequest.Builder.class);
     }
 
-    public static final int STATUS_FIELD_NUMBER = 1;
+    public static final int NODEID_FIELD_NUMBER = 1;
+    private int nodeId_;
+    /**
+     * <code>int32 nodeId = 1;</code>
+     */
+    public int getNodeId() {
+      return nodeId_;
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 2;
     private volatile java.lang.Object status_;
     /**
-     * <code>string status = 1;</code>
+     * <code>string status = 2;</code>
      */
     public java.lang.String getStatus() {
       java.lang.Object ref = status_;
@@ -145,7 +165,7 @@ public final class ElectionServiceOuterClass {
       }
     }
     /**
-     * <code>string status = 1;</code>
+     * <code>string status = 2;</code>
      */
     public com.google.protobuf.ByteString
         getStatusBytes() {
@@ -161,19 +181,19 @@ public final class ElectionServiceOuterClass {
       }
     }
 
-    public static final int VALUE_FIELD_NUMBER = 2;
+    public static final int VALUE_FIELD_NUMBER = 3;
     private int value_;
     /**
-     * <code>int32 value = 2;</code>
+     * <code>int32 value = 3;</code>
      */
     public int getValue() {
       return value_;
     }
 
-    public static final int TIMESTAMP_FIELD_NUMBER = 3;
+    public static final int TIMESTAMP_FIELD_NUMBER = 4;
     private long timestamp_;
     /**
-     * <code>int64 timestamp = 3;</code>
+     * <code>int64 timestamp = 4;</code>
      */
     public long getTimestamp() {
       return timestamp_;
@@ -191,14 +211,17 @@ public final class ElectionServiceOuterClass {
 
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (nodeId_ != 0) {
+        output.writeInt32(1, nodeId_);
+      }
       if (!getStatusBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, status_);
       }
       if (value_ != 0) {
-        output.writeInt32(2, value_);
+        output.writeInt32(3, value_);
       }
       if (timestamp_ != 0L) {
-        output.writeInt64(3, timestamp_);
+        output.writeInt64(4, timestamp_);
       }
       unknownFields.writeTo(output);
     }
@@ -208,16 +231,20 @@ public final class ElectionServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (nodeId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, nodeId_);
+      }
       if (!getStatusBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, status_);
       }
       if (value_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, value_);
+          .computeInt32Size(3, value_);
       }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, timestamp_);
+          .computeInt64Size(4, timestamp_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -235,6 +262,8 @@ public final class ElectionServiceOuterClass {
       beans.ElectionServiceOuterClass.ElectionRequest other = (beans.ElectionServiceOuterClass.ElectionRequest) obj;
 
       boolean result = true;
+      result = result && (getNodeId()
+          == other.getNodeId());
       result = result && getStatus()
           .equals(other.getStatus());
       result = result && (getValue()
@@ -252,6 +281,8 @@ public final class ElectionServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NODEID_FIELD_NUMBER;
+      hash = (53 * hash) + getNodeId();
       hash = (37 * hash) + STATUS_FIELD_NUMBER;
       hash = (53 * hash) + getStatus().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
@@ -388,6 +419,8 @@ public final class ElectionServiceOuterClass {
       }
       public Builder clear() {
         super.clear();
+        nodeId_ = 0;
+
         status_ = "";
 
         value_ = 0;
@@ -416,6 +449,7 @@ public final class ElectionServiceOuterClass {
 
       public beans.ElectionServiceOuterClass.ElectionRequest buildPartial() {
         beans.ElectionServiceOuterClass.ElectionRequest result = new beans.ElectionServiceOuterClass.ElectionRequest(this);
+        result.nodeId_ = nodeId_;
         result.status_ = status_;
         result.value_ = value_;
         result.timestamp_ = timestamp_;
@@ -460,6 +494,9 @@ public final class ElectionServiceOuterClass {
 
       public Builder mergeFrom(beans.ElectionServiceOuterClass.ElectionRequest other) {
         if (other == beans.ElectionServiceOuterClass.ElectionRequest.getDefaultInstance()) return this;
+        if (other.getNodeId() != 0) {
+          setNodeId(other.getNodeId());
+        }
         if (!other.getStatus().isEmpty()) {
           status_ = other.status_;
           onChanged();
@@ -497,9 +534,35 @@ public final class ElectionServiceOuterClass {
         return this;
       }
 
+      private int nodeId_ ;
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public int getNodeId() {
+        return nodeId_;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder setNodeId(int value) {
+        
+        nodeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 nodeId = 1;</code>
+       */
+      public Builder clearNodeId() {
+        
+        nodeId_ = 0;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object status_ = "";
       /**
-       * <code>string status = 1;</code>
+       * <code>string status = 2;</code>
        */
       public java.lang.String getStatus() {
         java.lang.Object ref = status_;
@@ -514,7 +577,7 @@ public final class ElectionServiceOuterClass {
         }
       }
       /**
-       * <code>string status = 1;</code>
+       * <code>string status = 2;</code>
        */
       public com.google.protobuf.ByteString
           getStatusBytes() {
@@ -530,7 +593,7 @@ public final class ElectionServiceOuterClass {
         }
       }
       /**
-       * <code>string status = 1;</code>
+       * <code>string status = 2;</code>
        */
       public Builder setStatus(
           java.lang.String value) {
@@ -543,7 +606,7 @@ public final class ElectionServiceOuterClass {
         return this;
       }
       /**
-       * <code>string status = 1;</code>
+       * <code>string status = 2;</code>
        */
       public Builder clearStatus() {
         
@@ -552,7 +615,7 @@ public final class ElectionServiceOuterClass {
         return this;
       }
       /**
-       * <code>string status = 1;</code>
+       * <code>string status = 2;</code>
        */
       public Builder setStatusBytes(
           com.google.protobuf.ByteString value) {
@@ -568,13 +631,13 @@ public final class ElectionServiceOuterClass {
 
       private int value_ ;
       /**
-       * <code>int32 value = 2;</code>
+       * <code>int32 value = 3;</code>
        */
       public int getValue() {
         return value_;
       }
       /**
-       * <code>int32 value = 2;</code>
+       * <code>int32 value = 3;</code>
        */
       public Builder setValue(int value) {
         
@@ -583,7 +646,7 @@ public final class ElectionServiceOuterClass {
         return this;
       }
       /**
-       * <code>int32 value = 2;</code>
+       * <code>int32 value = 3;</code>
        */
       public Builder clearValue() {
         
@@ -594,13 +657,13 @@ public final class ElectionServiceOuterClass {
 
       private long timestamp_ ;
       /**
-       * <code>int64 timestamp = 3;</code>
+       * <code>int64 timestamp = 4;</code>
        */
       public long getTimestamp() {
         return timestamp_;
       }
       /**
-       * <code>int64 timestamp = 3;</code>
+       * <code>int64 timestamp = 4;</code>
        */
       public Builder setTimestamp(long value) {
         
@@ -609,7 +672,7 @@ public final class ElectionServiceOuterClass {
         return this;
       }
       /**
-       * <code>int64 timestamp = 3;</code>
+       * <code>int64 timestamp = 4;</code>
        */
       public Builder clearTimestamp() {
         
@@ -1337,13 +1400,16 @@ public final class ElectionServiceOuterClass {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\025ElectionService.proto\022\005beans\"C\n\017Electi" +
-      "onRequest\022\016\n\006status\030\001 \001(\t\022\r\n\005value\030\002 \001(\005" +
-      "\022\021\n\ttimestamp\030\003 \001(\003\"B\n\020ElectionResponse\022" +
-      "\016\n\006nodeId\030\001 \001(\005\022\013\n\003ack\030\002 \001(\t\022\021\n\ttimestam" +
-      "p\030\003 \001(\0032Y\n\017ElectionService\022F\n\023sendElecti" +
-      "onMessage\022\026.beans.ElectionRequest\032\027.bean" +
-      "s.ElectionResponseb\006proto3"
+      "\n\025ElectionService.proto\022\005beans\"S\n\017Electi" +
+      "onRequest\022\016\n\006nodeId\030\001 \001(\005\022\016\n\006status\030\002 \001(" +
+      "\t\022\r\n\005value\030\003 \001(\005\022\021\n\ttimestamp\030\004 \001(\003\"B\n\020E" +
+      "lectionResponse\022\016\n\006nodeId\030\001 \001(\005\022\013\n\003ack\030\002" +
+      " \001(\t\022\021\n\ttimestamp\030\003 \001(\0032\247\001\n\017ElectionServ" +
+      "ice\022F\n\023sendElectionMessage\022\026.beans.Elect" +
+      "ionRequest\032\027.beans.ElectionResponse\022L\n\025s" +
+      "treamElectionMessage\022\026.beans.ElectionReq" +
+      "uest\032\027.beans.ElectionResponse(\0010\001b\006proto" +
+      "3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1362,7 +1428,7 @@ public final class ElectionServiceOuterClass {
     internal_static_beans_ElectionRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_beans_ElectionRequest_descriptor,
-        new java.lang.String[] { "Status", "Value", "Timestamp", });
+        new java.lang.String[] { "NodeId", "Status", "Value", "Timestamp", });
     internal_static_beans_ElectionResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_beans_ElectionResponse_fieldAccessorTable = new

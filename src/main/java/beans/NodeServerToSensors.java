@@ -11,6 +11,7 @@ import simulators.SensorServiceImpl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class NodeServerToSensors extends Thread
 {
@@ -124,7 +125,7 @@ public class NodeServerToSensors extends Thread
                             System.out.println(node.getCoordinatorPort());
                             String serverAddress = "localhost:" + node.getCoordinatorPort();
 
-                            connectToCoordinator(serverAddress);
+//                            connectToCoordinator(serverAddress);
 
                             synchronized (node.getNodeServerToNodes().getCoordService().getElectingCoordinator())
                             {
@@ -257,7 +258,50 @@ public class NodeServerToSensors extends Thread
         }
     }
 
-    private void sendToCoordinator(Stat localStat){
+    private void sendToCoordinator(Stat localStat)
+    {
+        //plaintext channel on the address (ip/port) which offers the GreetingService service
+        final ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:" + node.getCoordinatorPort()).usePlaintext(true).build();
+
+        //creating an asynchronous stub on the channel
+        NodeServiceGrpc.NodeServiceStub stub = NodeServiceGrpc.newStub(channel);
+
+        NodeServiceOuterClass.LocalStatRequest request = NodeServiceOuterClass.LocalStatRequest.newBuilder().
+                setNodeId(localStat.getNodeId()).
+                setValue(localStat.getMean()).
+                setTimestamp(localStat.getTimestamp()).
+                build();
+
+        stub.sendToCoordinator(request, new StreamObserver<NodeServiceOuterClass.GlobalStatResponse>() {
+            @Override
+            //this hanlder takes care of each item received in the stream
+            public void onNext(NodeServiceOuterClass.GlobalStatResponse globalStatResponse)
+            {
+                Message globalStatMessage = new StatMessage("globalStatFromCoordinator", globalStatResponse.getTimestamp(),
+                        globalStatResponse.getNodeId(), globalStatResponse.getValue());
+
+                node.getMessagesBuffer().put(globalStatMessage);
+            }
+
+            @Override
+            //if there are some errors, this method will be called
+            public void onError(Throwable throwable)
+            {
+//                System.out.println("Error! " + throwable.getMessage());
+                startNewElection();
+            }
+
+            @Override
+            //when the stream is completed (the server called "onCompleted") just close the channel
+            public void onCompleted()
+            {
+                channel.shutdownNow();
+            }
+        });
+
+    }
+
+    private void streamToCoordinator(Stat localStat){
 
         StreamObserver<NodeServiceOuterClass.LocalStatRequest> requestObserver = coordinatorStub.streamToCoordinator(new StreamObserver<NodeServiceOuterClass.GlobalStatResponse>() {
             @Override
@@ -285,163 +329,7 @@ public class NodeServerToSensors extends Thread
             //if there are some errors, this method will be called
             public void onError(Throwable throwable)
             {
-
-                synchronized (electionLock)
-                {
-                    if (node.getState() != beans.State.ELECTING_COORDINATOR && !electionRequestDone && previousElectionNumber == currentElectionNumber) {
-                        electionRequestDone = true;
-
-//                        System.out.println(previousElectionNumber + " vs " + currentElectionNumber);
-
-                        System.out.println("Starting new election");
-
-                        // Start a new election
-                        node.setState(beans.State.ELECTING_COORDINATOR);
-
-                        try {
-                            Thread.sleep(15000);
-                        } catch (InterruptedException e) {
-                            System.out.println("Errore nello sleep");
-                        }
-
-                        // Rimuove il vecchio coordinatore dalla lista
-                        for (Node n : node.getNodesListCopy()) {
-                            if (n.getState() == beans.State.COORDINATOR) {
-                                node.removeNodeFromNodesList(n);
-                                node.updateNextNodes(node);
-                            }
-                        }
-
-                        Node nextNode = null;
-
-                        ArrayList<Node> nextNodesCopy = node.getNextNodesCopy();
-                        if (nextNodesCopy.size() > 0) {
-                            nextNode = nextNodesCopy.get(0);
-                        }
-                        else
-                            nextNode = null;
-
-//                        if (nextNode != null && nextNode.getState() == beans.State.COORDINATOR && nextNodesCopy.size() > 1) {
-//                            nextNode = nextNodesCopy.get(1);
-//
-//                            //                        node.getNextNodes().remove(nextNode);
-//                            //                        node.getNodesList().remove(nextNode);
-//                        }
-//                        else if (nextNode != null && nextNode.getState() == beans.State.COORDINATOR && nextNodesCopy.size() <= 1)
-//                            nextNode = null;
-
-                        if (nextNode != null)
-                        {
-//                            System.out.println(nextNode + " " + nextNode.getState());
-                            boolean sent = false;
-                            while (!sent)
-                            {
-                                try
-                                {
-                                    node.sendElectionMessage(nextNode, "ELECTING", node.getId());
-                                    sent = true;
-                                }
-                                catch (Exception e)
-                                {
-                                    System.out.println("Nodo " + nextNode + " non disponibile.");
-
-                                    // Rimuove il nodo non disponibile dai nodi e ricalcola i nodi vicini
-                                    node.removeNodeFromNodesList(nextNode);
-                                    node.updateNextNodes(node);
-
-                                    nextNodesCopy = node.getNextNodesCopy();
-
-                                    if (nextNodesCopy.size() > 0)
-                                    {
-                                        nextNode = nextNodesCopy.get(0);
-                                        System.out.println("Provo con il prossimo nodo: " + nextNode);
-                                    }
-                                    else
-                                    {
-                                        System.out.println("NON CI SONO ALTRI NODI " + node.getNodesListCopy());
-                                        // Non ci sono altri nodi, quindi diventa lui il coordinatore
-                                        nextNode = null;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        else if (nextNode == null)
-                        {
-                            // Elezione conclusa
-                            System.out.println("ELEZIONE CONCLUSA");
-
-                            // Si imposta coordinatore
-                            node.setState(beans.State.COORDINATOR);
-
-                            node.setCoordinatorPort(node.getNodesPort());
-
-                            synchronized (node.getNodeServerToNodes().getCoordService().getElectingCoordinator())
-                            {
-                                node.getNodeServerToNodes().getCoordService().getElectingCoordinator().notifyAll();
-                            }
-
-                            // Apre la connessione con il Server Cloud
-                            System.out.println(node.getServerAddress());
-                            node.setNodeClient(new NodeClient(node, node.getServerAddress()));
-                            node.getNodeClient().start();
-
-                            // Chiude la connessione con gli altri da non coordinatore
-                            node.getNodeServerToNodes().getServerToNodes().shutdownNow();
-
-                            // Apre la connessione con gli altri da coordinatore
-                            NodeServiceImpl nodeService = new NodeServiceImpl(node);
-                            CoordServiceImpl coordService = new CoordServiceImpl(node);
-                            ElectionServiceImpl electionService = new ElectionServiceImpl(node);
-
-                            Server coordinatorServer = ServerBuilder.forPort(node.getNodesPort()).
-                                    addService(nodeService).
-                                    addService(coordService).
-                                    addService(electionService).
-                                    build();
-                            node.getNodeServerToNodes().setServerToNodes(coordinatorServer);
-                            try {
-                                node.getNodeServerToNodes().getServerToNodes().start();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-//                            coordService = new CoordServiceImpl(node);
-//                            ElectionServiceImpl electionService = new ElectionServiceImpl(node);
-//
-//                            Server coordinatorServer = ServerBuilder.forPort(node.getNodesPort()).
-//                                    addService(nodeService).
-//                                    addService(coordService).
-//                                    addService(electionService).
-//                                    build();
-//                            node.getNodeServer().setCoordinatorServer(coordinatorServer);
-//                            try {
-//                                node.getNodeServer().getCoordinatorServer().start();
-//                            } catch (IOException e) {
-//                                System.out.println("Errore nel lanciare il server coordinatore");
-//                            }
-
-                            System.out.println("Coordinator server started, node " + node.getId() + "!");
-
-                            Node exCoord = null;
-                            ArrayList<Node> nodesListCopy = node.getNodesListCopy();
-                            for (Node n : nodesListCopy)
-                                if (n.getState() == beans.State.COORDINATOR)
-                                    exCoord = n;
-
-                            node.removeNodeFromNodesList(exCoord);
-                            node.removeNodeFromNextNodes(exCoord);
-
-                            System.out.println(node.getNextNodesCopy());
-                            System.out.println(node.getNodesListCopy());
-
-                            currentElectionNumber++;
-                        }
-                    }
-                }
-
-//                System.out.println("Error! " + throwable.getMessage());
+                startNewElection();
             }
 
             @Override
@@ -521,5 +409,187 @@ public class NodeServerToSensors extends Thread
 
     public void setServerToSensors(Server serverToSensors) {
         this.serverToSensors = serverToSensors;
+    }
+
+    public void startNewElection()
+    {
+        synchronized (node.getNodeServerToNodes().sendingLock) {
+            if (node.getState() != beans.State.ELECTING_COORDINATOR && !electionRequestDone && previousElectionNumber == currentElectionNumber) {
+                electionRequestDone = true;
+
+//                        System.out.println(previousElectionNumber + " vs " + currentElectionNumber);
+
+                System.out.println("Starting new election");
+
+                // Start a new election
+                node.setState(beans.State.ELECTING_COORDINATOR);
+
+                node.sending = true;
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    System.out.println("Errore nello sleep");
+                }
+
+                // Rimuove il vecchio coordinatore dalla lista
+                for (Node n : node.getNodesListCopy()) {
+                    if (n.getState() == beans.State.COORDINATOR) {
+                        node.removeNodeFromNodesList(n);
+                        node.updateNextNodes(node);
+                    }
+                }
+
+                Node nextNode = null;
+
+                ArrayList<Node> nextNodesCopy = node.getNextNodesCopy();
+                if (nextNodesCopy.size() > 0) {
+                    nextNode = nextNodesCopy.get(0);
+                    node.connectToNextNode(nextNode);
+                } else {
+                    nextNode = null;
+                }
+
+//                        if (nextNode != null && nextNode.getState() == beans.State.COORDINATOR && nextNodesCopy.size() > 1) {
+//                            nextNode = nextNodesCopy.get(1);
+//
+//                            //                        node.getNextNodes().remove(nextNode);
+//                            //                        node.getNodesList().remove(nextNode);
+//                        }
+//                        else if (nextNode != null && nextNode.getState() == beans.State.COORDINATOR && nextNodesCopy.size() <= 1)
+//                            nextNode = null;
+
+                if (nextNode != null) {
+//                            System.out.println(nextNode + " " + nextNode.getState());
+                    boolean sent = false;
+                    while (!sent) {
+                        node.sendTries = 3;
+
+                        while (node.sendTries > 0) {
+                            try {
+                                int idToSend = node.getId();
+
+//                                        // Se ha già inviato un messaggio maggiore o uguale (non dovrebbe succedere in teoria)
+//                                        if (node.lastMessageSent != null && node.lastMessageSent.getValue() >= idToSend)
+//                                        {
+//                                            System.out.println("Già inviato");
+//                                            sent = true;
+//                                            break;
+//                                        }
+
+                                node.sendElectionMessageToNextNode(node, nextNode, "ELECTING", idToSend);
+//                                            node.getNodeServerToNodes().sendingLock.wait();
+
+                                if (node.resend) {
+                                    node.resend = false;
+                                    System.out.println("ECCEZIONE");
+                                    throw new Exception();
+                                }
+
+                                sent = true;
+                                System.out.println("Messaggio inviato al nodo " + nextNode);
+
+                                node.sending = false;
+
+                                break;
+                            } catch (Exception e) {
+                                System.out.println("Nodo " + nextNode + " non disponibile. Riprovo.");
+
+                                node.sendTries--;
+                            }
+                        }
+
+                        if (!sent) {
+                            // Rimuove il nodo non disponibile dai nodi e ricalcola i nodi vicini
+                            if (node.getNodeFromNodesList(nextNode.getId()) != null) {
+                                node.removeNodeFromNodesList(nextNode);
+                                node.updateNextNodes(node);
+                            }
+
+                            nextNodesCopy = node.getNextNodesCopy();
+
+                            if (nextNodesCopy.size() > 0) {
+                                nextNode = nextNodesCopy.get(0);
+                                node.connectToNextNode(nextNode);
+                                System.out.println("Provo con il prossimo nodo: " + nextNode);
+                            } else {
+                                System.out.println("NON CI SONO ALTRI NODI " + node.getNodesListCopy());
+                                // Non ci sono altri nodi, quindi diventa lui il coordinatore
+                                nextNode = null;
+                                break;
+                            }
+                        }
+                    }
+                } else if (nextNode == null) {
+                    // Elezione conclusa
+                    System.out.println("ELEZIONE CONCLUSA");
+
+                    // Si imposta coordinatore
+                    node.setState(beans.State.COORDINATOR);
+
+                    node.setCoordinatorPort(node.getNodesPort());
+
+                    synchronized (node.getNodeServerToNodes().getCoordService().getElectingCoordinator()) {
+                        node.getNodeServerToNodes().getCoordService().getElectingCoordinator().notifyAll();
+                    }
+
+                    // Apre la connessione con il Server Cloud
+                    System.out.println(node.getServerAddress());
+                    node.setNodeClient(NodeClient.getNodeClientInstance(node, node.getServerAddress()));
+                    node.getNodeClient().start();
+
+//                            // Chiude la connessione con gli altri da non coordinatore
+//                            node.getNodeServerToNodes().getServerToNodes().shutdownNow();
+//
+//                            // Apre la connessione con gli altri da coordinatore
+//                            NodeServiceImpl nodeService = new NodeServiceImpl(node);
+//                            CoordServiceImpl coordService = new CoordServiceImpl(node);
+//                            ElectionServiceImpl electionService = new ElectionServiceImpl(node);
+//
+//                            Server coordinatorServer = ServerBuilder.forPort(node.getNodesPort()).
+//                                    addService(nodeService).
+//                                    addService(coordService).
+//                                    addService(electionService).
+//                                    build();
+//                            node.getNodeServerToNodes().setServerToNodes(coordinatorServer);
+//                            try {
+//                                node.getNodeServerToNodes().getServerToNodes().start();
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+
+//                            coordService = new CoordServiceImpl(node);
+//                            ElectionServiceImpl electionService = new ElectionServiceImpl(node);
+//
+//                            Server coordinatorServer = ServerBuilder.forPort(node.getNodesPort()).
+//                                    addService(nodeService).
+//                                    addService(coordService).
+//                                    addService(electionService).
+//                                    build();
+//                            node.getNodeServer().setCoordinatorServer(coordinatorServer);
+//                            try {
+//                                node.getNodeServer().getCoordinatorServer().start();
+//                            } catch (IOException e) {
+//                                System.out.println("Errore nel lanciare il server coordinatore");
+//                            }
+
+                    System.out.println("Coordinator server started, node " + node.getId() + "!");
+
+                    Node exCoord = null;
+                    ArrayList<Node> nodesListCopy = node.getNodesListCopy();
+                    for (Node n : nodesListCopy)
+                        if (n.getState() == beans.State.COORDINATOR)
+                            exCoord = n;
+
+                    node.removeNodeFromNodesList(exCoord);
+                    node.removeNodeFromNextNodes(exCoord);
+
+                    System.out.println(node.getNextNodesCopy());
+                    System.out.println(node.getNodesListCopy());
+
+                    currentElectionNumber++;
+                }
+            }
+        }
     }
 }

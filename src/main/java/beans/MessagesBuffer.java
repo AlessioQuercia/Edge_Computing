@@ -1,5 +1,6 @@
 package beans;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MessagesBuffer
@@ -32,5 +33,15 @@ public class MessagesBuffer
 
     public ArrayList<Message> getBuffer() {
         return buffer;
+    }
+
+    public ArrayList<Message> getBufferCopy()
+    {
+        ArrayList<Message> copy;
+        synchronized (this)
+        {
+            copy = new ArrayList<>(buffer);
+        }
+        return copy;
     }
 }

@@ -17,6 +17,71 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
     }
 
     @Override
+    public void sendToCoordinator(NodeServiceOuterClass.LocalStatRequest request, final StreamObserver<NodeServiceOuterClass.GlobalStatResponse> responseObserver)
+    {
+        try {
+            StatMessage localStatMessage = new StatMessage("localStatFromNode", request.getTimestamp(),
+                    request.getNodeId(), request.getValue());
+
+            coordinator.getMessagesBuffer().put(localStatMessage);
+
+            synchronized (observers) {
+                if (observers.get(responseObserver) == null) {
+                    observers.put(responseObserver, request.getNodeId());
+                }
+            }
+
+            Set<Stat> globalStats = coordinator.getGlobalStatsCopy();
+
+            NodeServiceOuterClass.GlobalStatResponse response = null;
+
+            if (globalStats.size() > 0) {
+                // Costruisco la risposta con la global stat più recente
+                Stat globalStat = (Stat) globalStats.toArray()[globalStats.size() - 1];
+
+                response = NodeServiceOuterClass.GlobalStatResponse.newBuilder()
+                        .setNodeId(coordinator.getId())
+                        .setValue(globalStat.getMean())
+                        .setTimestamp(globalStat.getTimestamp())
+                        .build();
+            }
+
+            responseObserver.onNext(response);
+        }
+        catch (Exception e)
+        {
+            // Errore durante la ricezione della statistica locale e l'invio della statistica globale
+            System.out.println("Errore durante la ricezione della statistica locale e l'invio della statistica globale al nodo " + request.getNodeId());
+            synchronized (observers)
+            {
+//                    System.out.println(throwable.getMessage());
+                int crashedNodeId = observers.get(responseObserver);
+
+                if (coordinator.getNodeFromNodesList(crashedNodeId) != null && !coordinator.getNodeServerToNodes().isStop()) {
+
+                    System.out.println("RIMOSSO NODO " + crashedNodeId);
+
+                    observers.remove(responseObserver);
+
+                    Node removedNode = coordinator.getNodeFromNodesList(crashedNodeId);
+
+                    synchronized(coordinator.getRemovedNodes())
+                    {
+                        coordinator.getRemovedNodes().add(removedNode);
+                    }
+
+                    System.out.println(removedNode);
+
+                    coordinator.removeNodeFromNodesList(crashedNodeId);
+                    coordinator.updateNextNodes(coordinator);
+                }
+
+                observers.remove(responseObserver);
+            }
+        }
+    }
+
+    @Override
     public StreamObserver<NodeServiceOuterClass.LocalStatRequest> streamToCoordinator(final StreamObserver<NodeServiceOuterClass.GlobalStatResponse> responseObserver)
     {
         return new StreamObserver<NodeServiceOuterClass.LocalStatRequest>()
@@ -65,6 +130,7 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
             {
                 synchronized (observers)
                 {
+//                    System.out.println(throwable.getMessage());
                     int crashedNodeId = observers.get(responseObserver);
 
                     if (coordinator.getNodeFromNodesList(crashedNodeId) != null && !coordinator.getNodeServerToNodes().isStop()) {
@@ -83,11 +149,11 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
                         System.out.println(removedNode);
 
                         coordinator.removeNodeFromNodesList(crashedNodeId);
+                        coordinator.updateNextNodes(coordinator);
                     }
 
+                    observers.remove(responseObserver);
                 }
-
-                observers.remove(responseObserver);
 
 //                System.out.println("Comunicazione con il nodo " + senderId + " interrotta!");
 //

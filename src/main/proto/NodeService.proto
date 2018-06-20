@@ -18,5 +18,6 @@ message GlobalStatResponse
 // Defining a Service, a Service can have multiple RPC operations
 service NodeService 
 {
+	rpc sendToCoordinator(LocalStatRequest) returns (GlobalStatResponse);
     rpc streamToCoordinator(stream LocalStatRequest) returns (stream GlobalStatResponse);
 }
