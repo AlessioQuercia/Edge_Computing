@@ -1,0 +1,24 @@
+syntax = "proto3";
+package beans;
+
+message ElectionRequest
+{
+	int32 nodeId = 1;
+	string status = 2;
+    int32 value = 3;
+    int64 timestamp = 4;
+}
+
+message ElectionResponse
+{
+	int32 nodeId = 1;
+    string ack = 2;
+    int64 timestamp = 3;
+}
+
+// Defining a Service, a Service can have multiple RPC operations
+service ElectionService 
+{
+	rpc sendElectionMessage(ElectionRequest) returns (ElectionResponse);
+    rpc streamElectionMessage(stream ElectionRequest) returns (stream ElectionResponse);
+}
