@@ -320,15 +320,24 @@ public class NodeServerToNodes extends Thread
 //            e.printStackTrace();
 //        }
 
-//        // Rimuove il vecchio coordinatore dalla lista dei nodi
-//        for (Node n : node.getNodesListCopy())
-//        {
-//            if (n.getState() == beans.State.COORDINATOR)
-//            {
-//                node.removeNodeFromNodesList(n);
-//                node.updateNextNodes(node);
-//            }
-//        }
+        // Se riceve un messaggio di elezione, ma non si è ancora accorto dell'elezione,
+        // allora deve rimuovere il vecchio coordinatore dalla lista per evitare
+        // di inviare il prossimo messaggio a lui
+        synchronized (node.getState())
+        {
+            if (node.getState() != beans.State.ELECTING_COORDINATOR && message.getStatus().equals("ELECTING")) {
+                ArrayList<Node> nodesListCopy = node.getNodesListCopy();
+                nodesListCopy.remove(node);
+                for (Node n : nodesListCopy) {
+                    if (n.getNodesPort() == node.getCoordinatorPort()) {
+                        node.removeNodeFromNodesList(n);
+                        node.updateNextNodes(node);
+                        System.out.println("RIMOSSO COORDINATORE PRECEDENTE: " + n.getId());
+                    }
+                }
+                nodesListCopy.add(node);
+            }
+        }
 
         Node nextNode = null;
 
@@ -336,7 +345,8 @@ public class NodeServerToNodes extends Thread
         {
             nextNode = node.getNextNodesCopy().get(0);
         }
-        else {
+        else
+        {
             nextNode = null;
         }
 
@@ -346,14 +356,18 @@ public class NodeServerToNodes extends Thread
             {
                 if (node.lastMessageSent == null || (node.lastMessageSent != null && message.getValue() > node.lastMessageSent.getValue()))
                 {
-                    node.setState(beans.State.ELECTING_COORDINATOR);
+                    synchronized (node.getState()) {
+                        node.setState(beans.State.ELECTING_COORDINATOR);
+                    }
                     sendElectionMessage(nextNode, "ELECTING", message.getValue());
                 }
 //                node.streamElectionMessageToNextNode(nextNode, "ELECTING", message.getValue());
             }
             else if (message.getValue() < node.getId() && node.getState() != beans.State.ELECTING_COORDINATOR)
             {
-                node.setState(beans.State.ELECTING_COORDINATOR);
+                synchronized (node.getState()) {
+                    node.setState(beans.State.ELECTING_COORDINATOR);
+                }
                 sendElectionMessage(nextNode, "ELECTING", node.getId());
 //                node.streamElectionMessageToNextNode(nextNode, "ELECTING", node.getId());
             }
@@ -367,8 +381,10 @@ public class NodeServerToNodes extends Thread
                     // Imposta la porta del coordinatore come la sua porta per i nodi
                     node.setCoordinatorPort(node.getNodesPort());
 
-                    // Si imposta coordinatore
-                    node.setState(beans.State.COORDINATOR);
+                    synchronized (node.getState()) {
+                        // Si imposta coordinatore
+                        node.setState(beans.State.COORDINATOR);
+                    }
 
                     // Apre la connessione con il Server Cloud
                     node.setNodeClient(NodeClient.getNodeClientInstance(node, node.getServerAddress()));
@@ -418,7 +434,7 @@ public class NodeServerToNodes extends Thread
                 }
             }
         }
-        else if (nextNode != null && message.getStatus().equals("ELECTED")) // && node.getState() == beans.State.ELECTING_COORDINATOR)
+        else if (message.getStatus().equals("ELECTED")) // && node.getState() == beans.State.ELECTING_COORDINATOR)
         {
 
                 System.out.println("ELECTED RECEIVED");
@@ -447,7 +463,7 @@ public class NodeServerToNodes extends Thread
                     }
             }
 
-            if (node.getNodesPort() != coordPort)
+            if (nextNode != null && node.getNodesPort() != coordPort)
             {
                 if (node.lastMessageSent == null || (node.lastMessageSent != null && message.getValue() > node.lastMessageSent.getValue())) {
                     System.out.println("Non sono il coordinatore!");
@@ -468,20 +484,26 @@ public class NodeServerToNodes extends Thread
 
                     node.hiCoordinator("NEW_COORDINATOR");
 
-                    node.setState(beans.State.NOT_COORDINATOR);
+                    synchronized (node.getState()) {
+                        node.setState(beans.State.NOT_COORDINATOR);
+                    }
+//                    node.lastMessageSent = null;
                 }
                 else
                 {
                     System.out.println("ELECTED ALREADY RECEIVED AND SENT");
                 }
             }
-            else // porte uguali, allora è il coordinatore stesso
+            else if (node.getNodesPort() == coordPort) // porte uguali, allora è il coordinatore stesso
             {
                 // Elezione conclusa
                 System.out.println("ELEZIONE CONCLUSA");
 
-                // Si imposta coordinatore e conclude l'elezione
-                node.setState(beans.State.COORDINATOR);
+                synchronized (node.getState()) {
+                    // Si imposta coordinatore e conclude l'elezione
+                    node.setState(beans.State.COORDINATOR);
+                }
+//                node.lastMessageSent = null;
 
                 // Gestisce i messaggi di hiCoordinator
                 synchronized (waitForCoordinatorLock)
@@ -580,8 +602,10 @@ public class NodeServerToNodes extends Thread
                     // Elezione conclusa
                     System.out.println("ELEZIONE CONCLUSA");
 
-                    // Si imposta coordinatore
-                    node.setState(beans.State.COORDINATOR);
+                    synchronized (node.getState()) {
+                        // Si imposta coordinatore
+                        node.setState(beans.State.COORDINATOR);
+                    }
 
                     node.setCoordinatorPort(node.getNodesPort());
 

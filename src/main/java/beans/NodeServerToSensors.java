@@ -93,51 +93,48 @@ public class NodeServerToSensors extends Thread
                     // Crea la statistica locale
                     Stat localStat = new Stat(node.getId(), mean, node.deltaTime());
 
-                    if (node.getState() == beans.State.COORDINATOR)
-                    {
+                    synchronized (node.getState()) {
+                        if (node.getState() == beans.State.COORDINATOR) {
 
-                        synchronized (node.getRemovedNodes())
-                        {
-                            if (node.getRemovedNodes().size() > 0) {
-                                for (Node n : node.getRemovedNodes())
-                                {
-//                                    node.advicePreviousNodes(node, n, "RIMOSSO");
-                                    node.adviceNodes(node, n, "RIMOSSO");
+                            synchronized (node.getRemovedNodes()) {
+                                if (node.getRemovedNodes().size() > 0) {
+                                    for (Node n : node.getRemovedNodes()) {
+                                        //                                    node.advicePreviousNodes(node, n, "RIMOSSO");
+                                        node.adviceNodes(node, n, "RIMOSSO");
+                                    }
+
+                                    node.getRemovedNodes().clear();
                                 }
-
-                                node.getRemovedNodes().clear();
                             }
-                        }
 
+                        }
                     }
 
-                    if (node.getState() == beans.State.NOT_COORDINATOR)
-                    {
-                        if (electionRequestDone)
-                        {
-                            bindToCoord = false;
-                            electionRequestDone = false;
-                        }
-                        // Se non è collegato al coordinatore, collegalo
-                        if (!bindToCoord && node.getCoordinatorPort() != -1)
-                        {
-                            System.out.println(node.getCoordinatorPort());
-                            String serverAddress = "localhost:" + node.getCoordinatorPort();
+                    synchronized (node.getState()) {
+                        if (node.getState() == beans.State.NOT_COORDINATOR) {
+                            if (electionRequestDone) {
+                                bindToCoord = false;
+                                electionRequestDone = false;
+                            }
+                            // Se non è collegato al coordinatore, collegalo
+                            if (!bindToCoord && node.getCoordinatorPort() != -1) {
+                                System.out.println(node.getCoordinatorPort());
+//                            String serverAddress = "localhost:" + node.getCoordinatorPort();
 
 //                            connectToCoordinator(serverAddress);
 
-                            synchronized (node.getNodeServerToNodes().getCoordService().getElectingCoordinator())
-                            {
-                                node.getNodeServerToNodes().getCoordService().getElectingCoordinator().notifyAll();
+                                synchronized (node.getNodeServerToNodes().getCoordService().getElectingCoordinator()) {
+                                    node.getNodeServerToNodes().getCoordService().getElectingCoordinator().notifyAll();
+                                }
+
+                                bindToCoord = true;
                             }
 
-                            bindToCoord = true;
+                            // Invia la statistica locale al nodo coordinatore e aggiunge alla propria lista delle statistiche
+                            // globali la risposta (ultima statistica globale) inviata dal coordinatore
+                            if (node.getState() != beans.State.ELECTING_COORDINATOR && node.getCoordinatorPort() != -1)
+                                sendToCoordinator(localStat);
                         }
-
-                        // Invia la statistica locale al nodo coordinatore e aggiunge alla propria lista delle statistiche
-                        // globali la risposta (ultima statistica globale) inviata dal coordinatore
-                        if (node.getCoordinatorPort() != -1)
-                            sendToCoordinator(localStat);
                     }
 
                     node.addLocalStat(localStat);
@@ -412,16 +409,19 @@ public class NodeServerToSensors extends Thread
 
     public void startNewElection()
     {
-        synchronized (node.getNodeServerToNodes().sendingLock) {
-            if (node.getState() != beans.State.ELECTING_COORDINATOR && !electionRequestDone && previousElectionNumber == currentElectionNumber) {
+        synchronized (node.getNodeServerToNodes().sendingLock)
+        {
+            if (node.lastMessageSent == null && node.getState() != beans.State.ELECTING_COORDINATOR && !electionRequestDone && previousElectionNumber == currentElectionNumber) {
                 electionRequestDone = true;
 
 //                        System.out.println(previousElectionNumber + " vs " + currentElectionNumber);
 
                 System.out.println("Starting new election");
 
-                // Start a new election
-                node.setState(beans.State.ELECTING_COORDINATOR);
+                synchronized (node.getState()) {
+                    // Start a new election
+                    node.setState(beans.State.ELECTING_COORDINATOR);
+                }
 
                 node.sending = true;
 
@@ -525,8 +525,10 @@ public class NodeServerToSensors extends Thread
                     // Elezione conclusa
                     System.out.println("ELEZIONE CONCLUSA");
 
-                    // Si imposta coordinatore
-                    node.setState(beans.State.COORDINATOR);
+                    synchronized (node.getState()) {
+                        // Si imposta coordinatore
+                        node.setState(beans.State.COORDINATOR);
+                    }
 
                     node.setCoordinatorPort(node.getNodesPort());
 

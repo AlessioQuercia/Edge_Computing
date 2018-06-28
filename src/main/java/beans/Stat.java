@@ -9,7 +9,7 @@ public class Stat implements Comparable<Stat>
     private double mean;
     private long timestamp;
 
-    public Stat() {};
+    public Stat() {}
 
     public Stat(int nodeId, double mean, long timestamp)
     {

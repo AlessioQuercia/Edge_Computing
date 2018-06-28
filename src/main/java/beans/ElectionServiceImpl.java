@@ -89,8 +89,10 @@ public class ElectionServiceImpl extends ElectionServiceGrpc.ElectionServiceImpl
                         // Elezione conclusa
                         System.out.println("ELEZIONE CONCLUSA");
 
-                        // Si imposta coordinatore
-                        node.setState(beans.State.COORDINATOR);
+                        synchronized (node.getState()) {
+                            // Si imposta coordinatore
+                            node.setState(beans.State.COORDINATOR);
+                        }
 
                         node.setCoordinatorPort(node.getNodesPort());
 
@@ -200,8 +202,10 @@ public class ElectionServiceImpl extends ElectionServiceGrpc.ElectionServiceImpl
                             // Elezione conclusa
                             System.out.println("ELEZIONE CONCLUSA");
 
-                            // Si imposta coordinatore
-                            node.setState(beans.State.COORDINATOR);
+                            synchronized (node.getState()) {
+                                // Si imposta coordinatore
+                                node.setState(beans.State.COORDINATOR);
+                            }
 
                             node.setCoordinatorPort(node.getNodesPort());
 

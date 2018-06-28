@@ -35,6 +35,7 @@ public class Stream implements SensorStream
     @Override
     public void sendMeasurement(Measurement m)
     {
+        String measurementMessage = "";
         // Se sono passati 10 secondi, allora richiedi il nodo più vicino al sensore
         if (Math.abs(System.currentTimeMillis() - sensor.getLastRequestTime()) >= 10000) {
             sensor.requestNearestNode();
@@ -47,20 +48,24 @@ public class Stream implements SensorStream
             communicationOpen = false;
             sensor.requestNearestNode();
             sensor.setLastRequestTime(System.currentTimeMillis());
-            System.out.print("Sto scartando i dati: ");
+//            System.out.print("Sto scartando i dati: ");
+            measurementMessage = "Sto scartando i dati: ";
         }
         else if (sensor.getCommunicationNode() != null && sensor.getCommunicationNode().getId() != currentCommunicationNodeId)
         {
             communicationOpen = false;
             currentCommunicationNodeId = sensor.getCommunicationNode().getId();
+//            System.out.print("Sto scardando i dati, ma ho trovato un nodo (" + sensor.getCommunicationNode().getId() + ") : ");
+            measurementMessage = "Sto scardando i dati, ma ho trovato un nodo (" + sensor.getCommunicationNode().getId() + ") : ";
         }
-        else
+        else if (sensor.getCommunicationNode() != null)
         {
             if (!communicationOpen)
                 startAsynchronousStream();
             // Invio la misurazione al nodo a cui sono connesso
             try {
-                System.out.print("Sto inviando dati al nodo " + sensor.getCommunicationNode().getId() + ": ");
+//                System.out.print("Sto inviando dati al nodo " + sensor.getCommunicationNode().getId() + ": ");
+                measurementMessage = "Sto inviando dati al nodo " + sensor.getCommunicationNode().getId() + ": ";
                 requestObserver.onNext(SensorServiceOuterClass.MeasurementRequest.newBuilder().
                         setId(m.getId()).setType(m.getType()).setValue(m.getValue()).setTimestamp(m.getTimestamp()).build());
             } catch (Exception e)
@@ -70,7 +75,7 @@ public class Stream implements SensorStream
 
         }
         this.measurements.add(m);
-        System.out.println(m);
+        System.out.println(measurementMessage + m);
     }
 
     //calling an asynchronous method based on stream

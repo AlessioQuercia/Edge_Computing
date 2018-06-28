@@ -82,7 +82,25 @@ public class Node
 
     ElectionRequestMessage lastMessageSent;
 
-    public Node () {};
+    public Node ()
+    {
+        this.globalStats = new TreeSet<Stat>();
+        this.localStats = new TreeSet<Stat>();
+        this.state = State.NOT_COORDINATOR;
+        this.nextNodes = new ArrayList<Node>();
+        this.nodesList = new ArrayList<Node>();
+//        this.nodeServer = null;
+        this.nodeClient = null;
+        this.messagesBuffer = new MessagesBuffer();
+        this.midnight = computeMidnightMilliseconds();
+        this.removedNodes = new ArrayList<Node>();
+        this.coordinatorPort = -1;
+        this.receivedId = -1;
+        this.sending = false;
+        this.resend = false;
+        this.sendTries = 3;
+        this.lastMessageSent = null;
+    }
 
     public Node(int id, String ipAddress, int sensorsPort, int nodesPort, int x, int y)
     {
@@ -608,8 +626,10 @@ public class Node
 
                         System.out.println("ASKEDFORCOORDINATOR");
 
-                        if (thisNode.getState() == State.COORDINATOR)
-                            break;
+                        synchronized (thisNode.getState()) {
+                            if (thisNode.getState() == State.COORDINATOR)
+                                break;
+                        }
                     }
 
                     // Apre un canale con il coordinatore per avvertirlo
@@ -703,12 +723,13 @@ public class Node
                     }
                     thisNode.getNodeServerToNodes().getServerToNodes().shutdownNow();
 
-                    if (thisNode.getState() == State.COORDINATOR)
-                    {
-                        thisNode.nodeClient.setStop();
-                        thisNode.nodeClient.getConn().disconnect();
-                        thisNode.nodeClient.getClient().destroy();
-                        NodeClient.resetNodeClientInstance();
+                    synchronized (thisNode.getState()) {
+                        if (thisNode.getState() == State.COORDINATOR) {
+                            thisNode.nodeClient.setStop();
+                            thisNode.nodeClient.getConn().disconnect();
+                            thisNode.nodeClient.getClient().destroy();
+                            NodeClient.resetNodeClientInstance();
+                        }
                     }
 
 //                    conn.disconnect();
@@ -1008,15 +1029,15 @@ public class Node
             //if there are some errors, this method will be called
             public void onError(Throwable throwable)
             {
-                if (getNodeFromNodesList(nextNode.getId()) != null && thisNode.getState() == State.ELECTING_COORDINATOR)
-                {
-                    System.out.println(throwable.getMessage() + " ERRORE DURANTE LA RICEZIONE DELLA RISPOSTA");
+                synchronized (thisNode.getState()) {
+                    if (getNodeFromNodesList(nextNode.getId()) != null && thisNode.getState() == State.ELECTING_COORDINATOR) {
+                        System.out.println(throwable.getMessage() + " ERRORE DURANTE LA RICEZIONE DELLA RISPOSTA");
 
-                    thisNode.resend = true;
+                        thisNode.resend = true;
 
-                    synchronized (thisNode.getNodeServerToNodes().waitForAckLock)
-                    {
-                        thisNode.getNodeServerToNodes().waitForAckLock.notifyAll();
+                        synchronized (thisNode.getNodeServerToNodes().waitForAckLock) {
+                            thisNode.getNodeServerToNodes().waitForAckLock.notifyAll();
+                        }
                     }
                 }
             }

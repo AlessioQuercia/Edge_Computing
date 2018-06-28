@@ -56,9 +56,9 @@ public class NodesService
         if (!City.getInstance().isAddable(node))
             return Response.status(Response.Status.BAD_REQUEST).build();
 
-        Node n = new Node(node.getId(), node.getIpAddress(), node.getSensorsPort(), node.getNodesPort(), node.getX(), node.getY());
+//        Node n = new Node(node.getId(), node.getIpAddress(), node.getSensorsPort(), node.getNodesPort(), node.getX(), node.getY());
 
-        List<Node> nodes = City.getInstance().add(n);
+        List<Node> nodes = City.getInstance().add(node);
 
         GenericEntity<List<Node>> entity
                 = new GenericEntity<List<Node>>(nodes) {};
