@@ -229,12 +229,14 @@ public class NodeServerToNodes extends Thread
         // Aggiorna la lista dei vicini del nodo ricevente
         node.updateNextNodes(node);
 
-        if (node.getNextNodesCopy().size() > 0)
-            node.connectToNextNode(node.getNextNodesCopy().get(0));
+//        if (node.getNextNodesCopy().size() > 0)
+//            node.connectToNextNode(node.getNextNodesCopy().get(0));
 
         System.out.println("UPDATED NEXTNODES: " + node.getNextNodesCopy());
 
         System.out.println("UPDATED NODESLIST: " + node.getNodesListCopy());
+
+        node.getNodeClient().sentOne[requestNode.getId()] = false;
 
         if (node.getNodesListCopy().size() > 2 && !nodeRequestMessage.getType().equals("NEW_COORDINATOR"))
         {
@@ -286,8 +288,8 @@ public class NodeServerToNodes extends Thread
         // Aggiorna la lista dei vicini del nodo ricevente
         node.updateNextNodes(node);
 
-        if (node.getNextNodesCopy().size() > 0)
-            node.connectToNextNode(node.getNextNodesCopy().get(0));
+//        if (node.getNextNodesCopy().size() > 0)
+//            node.connectToNextNode(node.getNextNodesCopy().get(0));
 
         System.out.println("UPDATED NEXTNODES: " + node.getNextNodesCopy());
     }
@@ -311,11 +313,12 @@ public class NodeServerToNodes extends Thread
     {
         System.out.println("RECEIVED_MESSAGE " + message.getValue() + " FROM NODE " + message.getNodeId() + ", STATUS: " + message.getStatus());
 
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        // Test per nodo che esce durante elezione (dopo aver ricevuto un messaggio, ma prima di inviarne un altro)
+//        try {
+//            Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
 //        // Rimuove il vecchio coordinatore dalla lista dei nodi
 //        for (Node n : node.getNodesListCopy())
@@ -400,6 +403,14 @@ public class NodeServerToNodes extends Thread
                     sendElectionMessage(nextNode, "ELECTED", node.getNodesPort());
 
                     System.out.println("ELECTED SENT");
+
+                    node.clearNextNodes();
+                    node.clearNodesList();
+
+                    node.addNodeToNodesList(node);
+
+                    System.out.println(node.getNextNodesCopy());
+                    System.out.println(node.getNodesListCopy());
                 }
                 else
                 {
@@ -468,14 +479,6 @@ public class NodeServerToNodes extends Thread
             {
                 // Elezione conclusa
                 System.out.println("ELEZIONE CONCLUSA");
-
-                node.clearNextNodes();
-                node.clearNodesList();
-
-                node.addNodeToNodesList(node);
-
-                System.out.println(node.getNextNodesCopy());
-                System.out.println(node.getNodesListCopy());
 
                 // Si imposta coordinatore e conclude l'elezione
                 node.setState(beans.State.COORDINATOR);
@@ -567,7 +570,7 @@ public class NodeServerToNodes extends Thread
                 if (nextNodesCopy.size() > 0)
                 {
                     nextNode = nextNodesCopy.get(0);
-                    node.connectToNextNode(nextNode);
+//                    node.connectToNextNode(nextNode);
                     System.out.println("Provo con il prossimo nodo: " + nextNode);
                 }
                 else {

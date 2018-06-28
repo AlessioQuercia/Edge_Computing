@@ -46,7 +46,11 @@ public class NodeServiceImpl extends NodeServiceGrpc.NodeServiceImplBase
                         .build();
             }
 
+            // Invio la risposta
             responseObserver.onNext(response);
+
+            // Completo la comunicazione
+            responseObserver.onCompleted();
         }
         catch (Exception e)
         {

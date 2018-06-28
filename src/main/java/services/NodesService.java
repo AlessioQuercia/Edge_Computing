@@ -87,7 +87,7 @@ public class NodesService
     @Consumes({"application/json", "application/xml"})
     public Response sendGlobalStat(Stat stat)
     {
-        System.out.println(stat);
+//        System.out.println(stat);
         City.getInstance().addGlobalStat(stat);
         return Response.ok().build();
     }

@@ -24,7 +24,7 @@ public class City
 
     private static City instance;
 
-    public City()
+    private City()
     {
         nodesGrid = new Node[100][100];
         nodesList = new ArrayList<Node>();
@@ -67,7 +67,7 @@ public class City
 
     public void setNodesGrid(Node[][] nodesGrid)
     {
-        synchronized (nodesGrid)
+        synchronized (this.nodesGrid)
         {
             this.nodesGrid = nodesGrid;
         }

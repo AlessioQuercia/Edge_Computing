@@ -112,7 +112,7 @@ public class NodeClient extends Thread
                 response = resource.type(MediaType.APPLICATION_JSON_TYPE)
                         .post(ClientResponse.class, input);
 
-                System.out.println(response);
+//                System.out.println(response);
 
                 // Send local stats
                 method = "/sendLocalStats";
@@ -142,6 +142,8 @@ public class NodeClient extends Thread
 //            System.out.println();
 //            System.out.print("Type \'q\' to remove the node from the Server Cloud: ");
 
+            // Ogni 5 secondi calcola la statistica globale a partire dalle statistiche locali ricevute e la invia
+            // al Server Cloud
             try {
                 // Dormi per 5 secondi
                 sleep(5000);
@@ -228,11 +230,12 @@ public class NodeClient extends Thread
 
         for (Stat stat : lastStatForEachNode)
         {
-            if (stat.getTimestamp() < globalStatsCopyArray[globalStatsCopyArray.length-1].getTimestamp())
+            if (stat.getTimestamp() < globalStatsCopyArray[globalStatsCopyArray.length-1].getTimestamp() && sentOne[stat.getNodeId()])
             {
                 Node n = node.getNodeFromNodesList(stat.getNodeId());
                 node.removeNodeFromNodesList(n);
                 node.updateNextNodes(node);
+                sentOne[n.getId()] = false;
                 node.adviceNodes(node, n, "RIMOSSO");
                 System.out.println("RIMOSSO NODO " + n);
             }

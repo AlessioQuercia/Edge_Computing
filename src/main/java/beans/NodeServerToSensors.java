@@ -31,8 +31,8 @@ public class NodeServerToSensors extends Thread
 
     private int currentElectionNumber;
     private int previousElectionNumber;
-    private ManagedChannel coordinatorChannel;
-    private NodeServiceGrpc.NodeServiceStub coordinatorStub;
+//    private ManagedChannel coordinatorChannel;
+//    private NodeServiceGrpc.NodeServiceStub coordinatorStub;
 
     public NodeServerToSensors(Node node)
     {
@@ -40,8 +40,8 @@ public class NodeServerToSensors extends Thread
 
         this.stop = false;
         this.lastTime = System.currentTimeMillis();
-        this.coordinatorStub = null;
-        this.coordinatorChannel = null;
+//        this.coordinatorStub = null;
+//        this.coordinatorChannel = null;
         this.bindToCoord = false;
         this.electionRequestDone = false;
         this.currentElectionNumber = 0;
@@ -155,14 +155,14 @@ public class NodeServerToSensors extends Thread
         System.out.println("Server per i Sensori chiuso!");
     }
 
-    private void connectToCoordinator(String serverAddress)
-    {
-        //plaintext channel on the address (ip/port) which offers the MethodsService service
-        coordinatorChannel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext(true).build();
-
-        //creating an asynchronous stub on the channel
-        coordinatorStub = NodeServiceGrpc.newStub(coordinatorChannel);
-    }
+//    private void connectToCoordinator(String serverAddress)
+//    {
+//        //plaintext channel on the address (ip/port) which offers the MethodsService service
+//        coordinatorChannel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext(true).build();
+//
+//        //creating an asynchronous stub on the channel
+//        coordinatorStub = NodeServiceGrpc.newStub(coordinatorChannel);
+//    }
 
     public void setStop()
     {
@@ -300,59 +300,59 @@ public class NodeServerToSensors extends Thread
 
     }
 
-    private void streamToCoordinator(Stat localStat){
-
-        StreamObserver<NodeServiceOuterClass.LocalStatRequest> requestObserver = coordinatorStub.streamToCoordinator(new StreamObserver<NodeServiceOuterClass.GlobalStatResponse>() {
-            @Override
-            //this hanlder takes care of each item received in the stream
-            public void onNext(NodeServiceOuterClass.GlobalStatResponse response) {
-
-                Message globalStatMessage = new StatMessage("globalStatFromCoordinator", response.getTimestamp(),
-                        response.getNodeId(), response.getValue());
-
-                node.getMessagesBuffer().put(globalStatMessage);
-
-//                // Ricezione della risposta del server (global stat)
-//                // Se sono presenti statistiche globali (quindi ne è stata inviata una) allora salvala
-//                if (response != null)
-//                {
-//                    Stat globalStat = new Stat(response.getNodeId(), response.getValue(), response.getTimestamp());
+//    private void streamToCoordinator(Stat localStat){
 //
-////                    System.out.println("Global stat ricevuta: " + globalStat);
+//        StreamObserver<NodeServiceOuterClass.LocalStatRequest> requestObserver = coordinatorStub.streamToCoordinator(new StreamObserver<NodeServiceOuterClass.GlobalStatResponse>() {
+//            @Override
+//            //this hanlder takes care of each item received in the stream
+//            public void onNext(NodeServiceOuterClass.GlobalStatResponse response) {
 //
-//                    node.addGlobalStat(globalStat);
-//                }
-            }
-
-            @Override
-            //if there are some errors, this method will be called
-            public void onError(Throwable throwable)
-            {
-                startNewElection();
-            }
-
-            @Override
-            //when the stream is completed (the server called "onCompleted") just close the channel
-            public void onCompleted()
-            {
-                coordinatorChannel.shutdownNow();
-            }
-        });
-
-        // Invia la local stat al coordinatore
-        try {
-            requestObserver.onNext(NodeServiceOuterClass.LocalStatRequest.newBuilder().
-                    setNodeId(localStat.getNodeId()).
-                    setValue(localStat.getMean()).
-                    setTimestamp(localStat.getTimestamp()).
-                    build());
-//            requestObserver.onError(new Exception("Connessione con il coordinatore interrotta!"));
-        } catch (Exception e)
-        {
-            System.out.println("Errore nell'invio della statistica local al coordinatore");
-        }
-
-    }
+//                Message globalStatMessage = new StatMessage("globalStatFromCoordinator", response.getTimestamp(),
+//                        response.getNodeId(), response.getValue());
+//
+//                node.getMessagesBuffer().put(globalStatMessage);
+//
+////                // Ricezione della risposta del server (global stat)
+////                // Se sono presenti statistiche globali (quindi ne è stata inviata una) allora salvala
+////                if (response != null)
+////                {
+////                    Stat globalStat = new Stat(response.getNodeId(), response.getValue(), response.getTimestamp());
+////
+//////                    System.out.println("Global stat ricevuta: " + globalStat);
+////
+////                    node.addGlobalStat(globalStat);
+////                }
+//            }
+//
+//            @Override
+//            //if there are some errors, this method will be called
+//            public void onError(Throwable throwable)
+//            {
+//                startNewElection();
+//            }
+//
+//            @Override
+//            //when the stream is completed (the server called "onCompleted") just close the channel
+//            public void onCompleted()
+//            {
+//                coordinatorChannel.shutdownNow();
+//            }
+//        });
+//
+//        // Invia la local stat al coordinatore
+//        try {
+//            requestObserver.onNext(NodeServiceOuterClass.LocalStatRequest.newBuilder().
+//                    setNodeId(localStat.getNodeId()).
+//                    setValue(localStat.getMean()).
+//                    setTimestamp(localStat.getTimestamp()).
+//                    build());
+////            requestObserver.onError(new Exception("Connessione con il coordinatore interrotta!"));
+//        } catch (Exception e)
+//        {
+//            System.out.println("Errore nell'invio della statistica local al coordinatore");
+//        }
+//
+//    }
 
     public boolean isStop() {
         return stop;
@@ -378,21 +378,21 @@ public class NodeServerToSensors extends Thread
         this.electionLock = electionLock;
     }
 
-    public ManagedChannel getCoordinatorChannel() {
-        return coordinatorChannel;
-    }
+//    public ManagedChannel getCoordinatorChannel() {
+//        return coordinatorChannel;
+//    }
 
-    public void setCoordinatorChannel(ManagedChannel coordinatorChannel) {
-        this.coordinatorChannel = coordinatorChannel;
-    }
+//    public void setCoordinatorChannel(ManagedChannel coordinatorChannel) {
+//        this.coordinatorChannel = coordinatorChannel;
+//    }
 
-    public NodeServiceGrpc.NodeServiceStub getCoordinatorStub() {
-        return coordinatorStub;
-    }
+//    public NodeServiceGrpc.NodeServiceStub getCoordinatorStub() {
+//        return coordinatorStub;
+//    }
 
-    public void setCoordinatorStub(NodeServiceGrpc.NodeServiceStub coordinatorStub) {
-        this.coordinatorStub = coordinatorStub;
-    }
+//    public void setCoordinatorStub(NodeServiceGrpc.NodeServiceStub coordinatorStub) {
+//        this.coordinatorStub = coordinatorStub;
+//    }
 
     public SensorServiceImpl getSensorsService() {
         return sensorsService;
@@ -425,11 +425,13 @@ public class NodeServerToSensors extends Thread
 
                 node.sending = true;
 
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    System.out.println("Errore nello sleep");
-                }
+//                // Test per nodo che entra durante elezione
+//                // per nodo che esce durante elezione
+//                try {
+//                    Thread.sleep(5000);
+//                } catch (InterruptedException e) {
+//                    System.out.println("Errore nello sleep");
+//                }
 
                 // Rimuove il vecchio coordinatore dalla lista
                 for (Node n : node.getNodesListCopy()) {
@@ -444,7 +446,7 @@ public class NodeServerToSensors extends Thread
                 ArrayList<Node> nextNodesCopy = node.getNextNodesCopy();
                 if (nextNodesCopy.size() > 0) {
                     nextNode = nextNodesCopy.get(0);
-                    node.connectToNextNode(nextNode);
+//                    node.connectToNextNode(nextNode);
                 } else {
                     nextNode = null;
                 }
@@ -509,7 +511,7 @@ public class NodeServerToSensors extends Thread
 
                             if (nextNodesCopy.size() > 0) {
                                 nextNode = nextNodesCopy.get(0);
-                                node.connectToNextNode(nextNode);
+//                                node.connectToNextNode(nextNode);
                                 System.out.println("Provo con il prossimo nodo: " + nextNode);
                             } else {
                                 System.out.println("NON CI SONO ALTRI NODI " + node.getNodesListCopy());

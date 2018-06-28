@@ -1,7 +1,13 @@
+import beans.Node;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -12,12 +18,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Analist
 {
     public static void main(String[] args)
     {
-        Client c = Client.create();
+        ClientConfig config = new DefaultClientConfig();
+        config.getClasses().add(JacksonJaxbJsonProvider.class);
+        config.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+
+        Client c = Client.create(config);
 
         String serverAddress = null;
 
@@ -136,7 +148,15 @@ public class Analist
                 ClientResponse response = null;
                 response = resource.get(ClientResponse.class);
                 if (response.getStatus() == ClientResponse.Status.OK.getStatusCode())
-                    System.out.println(response.getEntity(String.class));
+                {
+                    if (method.equals("/getList"))
+                    {
+                        ArrayList<Node> nodesList = (ArrayList) response.getEntity(new GenericType<List<Node>>() {});
+                        System.out.println(nodesList);
+                    }
+                    else
+                        System.out.println(response.getEntity(String.class));
+                }
                 else
                     System.out.println(response);
 

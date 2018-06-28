@@ -79,7 +79,7 @@ public class ElectionServiceImpl extends ElectionServiceGrpc.ElectionServiceImpl
                         nextNode = node.getNextNodesCopy().get(0);
 
                     if (nextNode != null) {
-                        node.connectToNextNode(nextNode);
+//                        node.connectToNextNode(nextNode);
 
                         System.out.println("Reinvio il mio messaggio al prossimo nodo " + nextNode);
 
@@ -188,7 +188,7 @@ public class ElectionServiceImpl extends ElectionServiceGrpc.ElectionServiceImpl
 
                         if (nextNode != null)
                         {
-                            node.connectToNextNode(nextNode);
+//                            node.connectToNextNode(nextNode);
 
                             System.out.println("Reinvio il mio messaggio al prossimo nodo " + nextNode);
 
