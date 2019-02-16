@@ -4,7 +4,7 @@
 ## Purpose
 Project related to the Distributed and Pervasive Systems course for the Computer Science Master at Università degli Studi di Milano.
 
-This repository is intended to keep trace of the project development.
+This repository is intended to keep track of the project development.
 
 ## Overview
 This project aims at building a simulated city with Sensors sending signals and Edge Nodes receiving and elaborating them, to send them to a RESTful Web Service.
