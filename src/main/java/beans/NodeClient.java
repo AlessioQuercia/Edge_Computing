@@ -29,7 +29,11 @@ public class NodeClient extends Thread
 
     private long lastTime;
 
+    Object sendToServerCloudLock = new Object();
+
     private static NodeClient nodeClient;
+
+    private long stopTime;
 
     public boolean[] sentOne;
 
@@ -45,6 +49,14 @@ public class NodeClient extends Thread
         nodeClient = null;
     }
 
+    public long getStopTime() {
+        return stopTime;
+    }
+
+    public void setStopTime(long stopTime) {
+        this.stopTime = stopTime;
+    }
+
     private NodeClient(Node node, String serverAddress)
     {
         this.node = node;
@@ -53,6 +65,7 @@ public class NodeClient extends Thread
         this.midnight = computeMidnightMilliseconds();
         this.lastTime = System.currentTimeMillis();
         this.sentOne = new boolean[101];
+        this.stopTime = 0;
     }
 
     @Override
@@ -76,57 +89,64 @@ public class NodeClient extends Thread
         ClientResponse response = null;
         String nodesServices = serverAddress + "/nodesServices";
 
-        while (!stop)
+        synchronized (sendToServerCloudLock)
         {
-            Set<Stat> localStats = node.getLocalStatsCopy();
-            Stat[] statsCopy = localStats.toArray(new Stat[localStats.size()]);
+            while (!stop) {
 
-            if (statsCopy.length > 0)
-            {
-                // Controlla se qualche nodo è uscito dalla rete e in tal caso rimuovilo e avvisa gli altri
-                if (node.getNodesListCopy().size() > 1 && node.getGlobalStatsCopy().size() > 0)
-                    checkNodesList();
+                try {
+                    stopTime = System.currentTimeMillis();
+                    sendToServerCloudLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                // Compute global stat
+                Set<Stat> localStats = node.getLocalStatsCopy();
+                Stat[] statsCopy = localStats.toArray(new Stat[localStats.size()]);
 
-                double sum = 0;
+                if (statsCopy.length > 0) {
+                    // Controlla se qualche nodo è uscito dalla rete e in tal caso rimuovilo e avvisa gli altri
+                    if (node.getNodesListCopy().size() > 1 && node.getGlobalStatsCopy().size() > 0)
+                        checkNodesList();
 
-                for (int i = 0; i < statsCopy.length; i++)
-                    sum += statsCopy[i].getMean();
+                    // Compute global stat
 
-                double mean = sum / statsCopy.length;
+                    double sum = 0;
 
-                Stat globalStat = new Stat(node.getId(), mean, node.deltaTime());
+                    for (int i = 0; i < statsCopy.length; i++)
+                        sum += statsCopy[i].getMean();
 
-                // Store global stat
-                node.addGlobalStat(globalStat);
+                    double mean = sum / statsCopy.length;
 
-                // Send global stat
-                String method = "/sendGlobalStat";
-                //            String params = "/" + globalStat;
+                    Stat globalStat = new Stat(node.getId(), mean, node.deltaTime());
 
-                Gson gson = new Gson();
-                String input = gson.toJson(globalStat);
+                    // Store global stat
+                    node.addGlobalStat(globalStat);
 
-                resource = client.resource(nodesServices + method);
-                response = resource.type(MediaType.APPLICATION_JSON_TYPE)
-                        .post(ClientResponse.class, input);
+                    // Send global stat
+                    String method = "/sendGlobalStat";
+                    //            String params = "/" + globalStat;
 
-//                System.out.println(response);
+                    Gson gson = new Gson();
+                    String input = gson.toJson(globalStat);
 
-                // Send local stats
-                method = "/sendLocalStats";
-                input = gson.toJson(node.getLocalStatsCopy());
-                //            params = "/" + node.getStats();
-
-                resource = client.resource(nodesServices + method);
-                response = resource.type(MediaType.APPLICATION_JSON_TYPE)
-                        .post(ClientResponse.class, input);
+                    resource = client.resource(nodesServices + method);
+                    response = resource.type(MediaType.APPLICATION_JSON_TYPE)
+                            .post(ClientResponse.class, input);
 
 //                System.out.println(response);
 
-            }
+                    // Send local stats
+                    method = "/sendLocalStats";
+                    input = gson.toJson(node.getLocalStatsCopy());
+                    //            params = "/" + node.getStats();
 
+                    resource = client.resource(nodesServices + method);
+                    response = resource.type(MediaType.APPLICATION_JSON_TYPE)
+                            .post(ClientResponse.class, input);
+
+//                System.out.println(response);
+
+                }
 
 
 //            // Print node Panel
@@ -142,13 +162,14 @@ public class NodeClient extends Thread
 //            System.out.println();
 //            System.out.print("Type \'q\' to remove the node from the Server Cloud: ");
 
-            // Ogni 5 secondi calcola la statistica globale a partire dalle statistiche locali ricevute e la invia
-            // al Server Cloud
-            try {
-                // Dormi per 5 secondi
-                sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+//            // Ogni 5 secondi calcola la statistica globale a partire dalle statistiche locali ricevute e la invia
+//            // al Server Cloud
+//            try {
+//                // Dormi per 5 secondi
+//                sleep(5000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             }
         }
 

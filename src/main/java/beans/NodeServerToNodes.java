@@ -258,6 +258,11 @@ public class NodeServerToNodes extends Thread
 
         node.addLocalStat(localStat);
 
+        synchronized (node.getNodeClient().sendToServerCloudLock) {
+            if (Math.abs(System.currentTimeMillis() - node.getNodeClient().getStopTime()) >= 5000)
+                node.getNodeClient().sendToServerCloudLock.notifyAll();
+        }
+
         if (!node.getNodeClient().sentOne[localStat.getNodeId()])
             node.getNodeClient().sentOne[localStat.getNodeId()] = true;
     }

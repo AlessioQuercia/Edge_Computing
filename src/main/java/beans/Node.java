@@ -726,6 +726,10 @@ public class Node
                     synchronized (thisNode.getState()) {
                         if (thisNode.getState() == State.COORDINATOR) {
                             thisNode.nodeClient.setStop();
+                            synchronized (thisNode.nodeClient.sendToServerCloudLock)
+                            {
+                                thisNode.nodeClient.sendToServerCloudLock.notifyAll();
+                            }
                             thisNode.nodeClient.getConn().disconnect();
                             thisNode.nodeClient.getClient().destroy();
                             NodeClient.resetNodeClientInstance();
