@@ -8,9 +8,4 @@ This project aims at building a simulated city with Sensors sending signals and 
 
 Modeling a city with Sensors spread over the city sending measurements to the nearest Edge Node connected to the Edge Nodes peer-to-peer network. Each Node receives measurements from different Sensors, compute statistics using those measurements and send them to the Edge Node Coordinator. This last one compute statistics using the statistics received and send every statistic to a RESTful Web Service Server Cloud. Analist clients may query the Server Cloud to obtain global and local statistics computed by Edge Nodes.
 
-For more info, read the report in the Links section.
-
-## Links
-**Project description**: https://github.com/AlessioQuercia/Edge_Computing/blob/master/progettoSDP2018.pdf
-
-**Report**: https://github.com/AlessioQuercia/Edge_Computing/blob/master/DistributedSystems.pdf
+For more info, read the report inside the repository.
